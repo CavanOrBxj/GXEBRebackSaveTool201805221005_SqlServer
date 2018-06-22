@@ -1,0 +1,17 @@
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/SecuSoft/!svn/ver/5/trunk/VMC/VMC%20Setup/Setup%20Client/packages/MySql.Data.6.9.6/content
+END
+web.config.transform
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svn/SecuSoft/!svn/ver/5/trunk/VMC/VMC%20Setup/Setup%20Client/packages/MySql.Data.6.9.6/content/web.config.transform
+END
+app.config.transform
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svn/SecuSoft/!svn/ver/5/trunk/VMC/VMC%20Setup/Setup%20Client/packages/MySql.Data.6.9.6/content/app.config.transform
+END

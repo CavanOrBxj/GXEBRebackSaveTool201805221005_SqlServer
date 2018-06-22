@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <ItemGroup>
+        <HP-SOCKET Include="$(MSBuildThisFileDirectory)\..\content\HPSocketx86\*.*" />
+    </ItemGroup>
+	<PropertyGroup>
+	<!-- Copy Firefox files to output dir -->
+	</PropertyGroup>	
+	 <Target Name="CopyHP-SOCKETx64">
+		<Copy SourceFiles="@(HP-SOCKET)" DestinationFolder="$(MSBuildProjectDirectory)\..\PutHP-SOCKETHere\HPSocketx86" SkipUnchangedFiles="true" />
+	</Target>
+</Project>

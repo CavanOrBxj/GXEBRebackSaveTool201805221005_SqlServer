@@ -1,0 +1,20 @@
+2018-03-07 10:06:13,038 [24] ERROR GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 收到文本转语音MQ指令
+2018-03-07 10:07:13,136 [22] ERROR GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 收到文本转语音MQ指令
+2018-03-07 11:51:58,476 [11] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-202
+2018-03-07 11:55:20,201 [11] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-202
+2018-03-07 11:56:08,817 [10] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-202
+2018-03-07 11:58:13,362 [11] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-202
+2018-03-07 14:36:39,873 [23] INFO  GXEBRebackSaveTool.FormMain [(null)] - 文本转语音MQ指令：PACKETTYPE~TTS|TsCmd_Mode~区域|TsCmd_Type~TTS播放|TsCmd_UserID~1|TsCmd_ValueID~3|TsCmd_Params~12|TsCmd_Date~2018-03-07 14:36:38|TsCmd_Status~0|USER_PRIORITY~0|USER_ORG_CODE~P37|TsCmd_PlayCount~1
+2018-03-07 14:38:24,693 [23] ERROR GXEBRebackSaveTool.Utils.MySQLDBHelper [(null)] - 查询区域码异常
+System.ArgumentException: 列“ORG_CAODEA”不属于表 。
+   在 System.Data.DataRow.GetDataColumn(String columnName)
+   在 System.Data.DataRow.get_Item(String columnName)
+   在 GXEBRebackSaveTool.Utils.MySQLDBHelper.AeraCode2DeviceID(List`1 AeraID) 位置 d:\ProjectDoc\revision\GXEBRebackSaveTool201802060848_MySQL\GXEBRebackSaveTool\GXEBRebackSaveTool\Utils\MySQLDBHelper.cs:行号 487
+2018-03-07 15:29:36,028 [9] ERROR GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 收到文本转语音MQ指令
+2018-03-07 15:29:36,064 [9] INFO  GXEBRebackSaveTool.FormMain [(null)] - 文本转语音指令进行组装发送阶段
+2018-03-07 15:29:36,065 [9] INFO  GXEBRebackSaveTool.FormMain [(null)] - 文本转语音指令设备ID 1 2 4 5
+2018-03-07 15:29:36,093 [9] INFO  GXEBRebackSaveTool.FormMain [(null)] - 文本转语音指令物理码 0102030408 0000113639 0000115022 0102030405
+2018-03-07 15:29:36,093 [9] INFO  GXEBRebackSaveTool.FormMain [(null)] - 文本转语音指令的物理码搜不到数据头，当前物理码：0102030408
+2018-03-07 15:29:36,094 [9] INFO  GXEBRebackSaveTool.FormMain [(null)] - 文本转语音指令的物理码搜不到数据头，当前物理码：0000113639
+2018-03-07 15:29:36,094 [9] INFO  GXEBRebackSaveTool.FormMain [(null)] - 文本转语音指令的物理码搜不到数据头，当前物理码：0000115022
+2018-03-07 15:29:36,095 [9] INFO  GXEBRebackSaveTool.FormMain [(null)] - 文本转语音指令的物理码搜不到数据头，当前物理码：0102030405

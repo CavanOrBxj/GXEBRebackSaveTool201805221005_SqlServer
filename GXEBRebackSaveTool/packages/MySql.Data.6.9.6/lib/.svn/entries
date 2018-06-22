@@ -1,0 +1,40 @@
+10
+
+dir
+232
+https://secusoft-server/svn/SecuSoft/trunk/VMC/VMC%20Setup/Setup%20Client/packages/MySql.Data.6.9.6/lib
+https://secusoft-server/svn/SecuSoft
+
+
+
+2016-06-15T09:05:44.995883Z
+5
+twu
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+79c897d4-51ea-874d-a13f-d79102f73e8b
+
+net45
+dir
+
+net20
+dir
+
+net40
+dir
+
+net20-cf
+dir
+
