@@ -126,6 +126,9 @@ namespace GXEBRebackSaveTool
             DataDealHelper.MyEvent += new DataDealHelper.MyDelegate(SendDataResponse);
 
             this.timercounter = 0;
+
+            btnStart_Click(null,null);
+            log.Info("回传服务启动：启动时间->" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
         }
 
         void EquipmentHelper_MyEvent(object data)
