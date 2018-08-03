@@ -90,7 +90,8 @@ namespace GXEBRebackSaveTool
                 }
                 #endregion
 
-                m_mq.Close();//关闭MQ连接
+                //  m_mq.Close();//关闭MQ连接  注  进程中关闭的时候会有异常
+                System.Environment.Exit(0);
             }
             catch (Exception)
             {
@@ -143,12 +144,20 @@ namespace GXEBRebackSaveTool
         /// </summary>
         private void ConnectMQServer()
         {
-            FormMain.m_mq.uri = "tcp://" + this.ini.ReadValue("MQ", "MQIP") + ":" + this.ini.ReadValue("MQ", "MQPORT");
-            FormMain.m_mq.Start();
-            this.isConn = true;
-            this.m_consumer = FormMain.m_mq.CreateConsumer(false, this.ini.ReadValue("MQ", "TopicName"));
-            this.m_consumer.Listener += this.consumer_listener;
-            FormMain.m_mq.CreateProducer(false, this.ini.ReadValue("MQ", "TopicName"));
+            try
+            {
+                FormMain.m_mq.uri = "tcp://" + this.ini.ReadValue("MQ", "MQIP") + ":" + this.ini.ReadValue("MQ", "MQPORT");
+                FormMain.m_mq.Start();
+                this.isConn = true;
+                this.m_consumer = FormMain.m_mq.CreateConsumer(false, this.ini.ReadValue("MQ", "TopicName"));
+                this.m_consumer.Listener += this.consumer_listener;
+                FormMain.m_mq.CreateProducer(false, this.ini.ReadValue("MQ", "TopicName"));
+            }
+            catch (Exception)
+            {
+
+            
+            }
         }
         private void consumer_listener(IMessage message)
         {
@@ -199,11 +208,18 @@ namespace GXEBRebackSaveTool
         /// <param name="e"></param>
         private void btnUpdateLocalHost_Click(object sender, EventArgs e)
         {
-            //修改配置
-            new Forms.FormSetting(isServerRun).ShowDialog(this);
+            try
+            {
+                //修改配置
+                new Forms.FormSetting(isServerRun).ShowDialog(this);
+                textTcpPort.Text = ini.ReadValue("LocalHost", "TCPLocalPort");
+                textUdpPort.Text = ini.ReadValue("LocalHost", "UDPLocalPort");
+            }
+            catch (Exception)
+            {
 
-            textTcpPort.Text = ini.ReadValue("LocalHost", "TCPLocalPort");
-            textUdpPort.Text = ini.ReadValue("LocalHost", "UDPLocalPort");
+                
+            }
         }
 
         private void btnStart_Click(object sender, EventArgs e)
@@ -306,35 +322,49 @@ namespace GXEBRebackSaveTool
 
         private void Server_UDPReceiveData(object sender, SocketDataEventArgs e)
         {
-            if (e.Data != null && e.Data.Length > 0)
+            try
             {
-                dataHelper.Enqueue(e.Data, e.ConnId, e.EndPoint.ToString().Split(':')[0], Convert.ToInt32(e.EndPoint.ToString().Split(':')[1]));
-                Invoke(new MethodInvoker(() =>
+                if (e.Data != null && e.Data.Length > 0)
                 {
-                    richTextRebackMsg.AppendText("接收时间:" + DateTime.Now + "\n");
-                    richTextRebackMsg.AppendText("数据:" + e.Data.ToNumberArrayString(" ", 16) + "\n");
-                }));
-                if (saveDataToLog)
-                {
-                    log.Info(e.Data.ToNumberArrayString(" ", 16));
+                    dataHelper.Enqueue(e.Data, e.ConnId, e.EndPoint.ToString().Split(':')[0], Convert.ToInt32(e.EndPoint.ToString().Split(':')[1]));
+                    Invoke(new MethodInvoker(() =>
+                    {
+                        richTextRebackMsg.AppendText("接收时间:" + DateTime.Now + "\n");
+                        richTextRebackMsg.AppendText("数据:" + e.Data.ToNumberArrayString(" ", 16) + "\n");
+                    }));
+                    if (saveDataToLog)
+                    {
+                        log.Info(e.Data.ToNumberArrayString(" ", 16));
+                    }
                 }
+            }
+            catch (Exception)
+            {
+                
             }
         }
 
         private void Server_TCPReceiveData(object sender, SocketDataEventArgs e)
         {
-            if (e.Data != null && e.Data.Length > 0)
+            try
             {
-                dataHelper.Enqueue(e.Data, e.ConnId, e.EndPoint.ToString().Split(':')[0], Convert.ToInt32(e.EndPoint.ToString().Split(':')[1]));
-                Invoke(new MethodInvoker(() =>
+                if (e.Data != null && e.Data.Length > 0)
                 {
-                    richTextRebackMsg.AppendText("接收时间:" + DateTime.Now + "\n");
-                    richTextRebackMsg.AppendText("数据:" + e.Data.ToNumberArrayString(" ", 16) + "\n");
-                }));
-                if (saveDataToLog)
-                {
-                    log.Info(e.Data.ToNumberArrayString(" ", 16));
+                    dataHelper.Enqueue(e.Data, e.ConnId, e.EndPoint.ToString().Split(':')[0], Convert.ToInt32(e.EndPoint.ToString().Split(':')[1]));
+                    Invoke(new MethodInvoker(() =>
+                    {
+                        richTextRebackMsg.AppendText("接收时间:" + DateTime.Now + "\n");
+                        richTextRebackMsg.AppendText("数据:" + e.Data.ToNumberArrayString(" ", 16) + "\n");
+                    }));
+                    if (saveDataToLog)
+                    {
+                        log.Info(e.Data.ToNumberArrayString(" ", 16));
+                    }
                 }
+            }
+            catch (Exception)
+            {
+                
             }
         }
 
@@ -937,7 +967,7 @@ namespace GXEBRebackSaveTool
             catch (Exception)
             {
                 
-                throw;
+              
             }
         }
 
@@ -958,7 +988,7 @@ namespace GXEBRebackSaveTool
             }
             catch (Exception)
             {
-                throw;
+               
             }
         }
 
@@ -985,7 +1015,6 @@ namespace GXEBRebackSaveTool
             catch (Exception)
             {
                 
-                throw;
             }
         }
 
@@ -1024,7 +1053,6 @@ namespace GXEBRebackSaveTool
             catch (Exception)
             {
                 
-                throw;
             }
         }
 
@@ -1058,7 +1086,6 @@ namespace GXEBRebackSaveTool
             catch (Exception)
             {
                 
-                throw;
             }
         }
 
