@@ -128,6 +128,15 @@ namespace GXEBRebackSaveTool
 
             this.timercounter = 0;
 
+
+            SingletonInfo.GetInstance().FTPServer = ini.ReadValue("Reback", "FTPServer");
+            SingletonInfo.GetInstance().FTPPort = ini.ReadValue("Reback", "FTPPort");
+            SingletonInfo.GetInstance().FTPUserName = ini.ReadValue("Reback", "FTPUserName");
+            SingletonInfo.GetInstance().FTPPwd = ini.ReadValue("Reback", "FTPPwd");
+            string tmpftppath = ini.ReadValue("Reback", "ftppath").Split(':')[1];
+            SingletonInfo.GetInstance().ftppath =tmpftppath.Remove(0,1); 
+
+
             btnStart_Click(null,null);
             log.Info("回传服务启动：启动时间->" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
         }

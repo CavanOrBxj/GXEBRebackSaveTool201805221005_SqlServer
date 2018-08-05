@@ -22,6 +22,12 @@ namespace GXEBRebackSaveTool
 
         public int FileID;//文件ID  平台发送文本到服务 服务生成一个文件ID（每次自增 最大65535）  
 
+        public string FTPServer;
+        public string FTPPort;
+        public string FTPUserName;
+        public string FTPPwd;
+        public string ftppath;
+
         private SingletonInfo()                                                                 
         {
             factorycode = ""; //
@@ -31,6 +37,11 @@ namespace GXEBRebackSaveTool
             HistoryHeaderData = new Dictionary<string, byte[]>();
             FileID = 0;
 
+            FTPServer = "";
+            FTPPort = "";
+            FTPUserName = "";
+            FTPPwd = "";
+            ftppath = "";
         }
 
    

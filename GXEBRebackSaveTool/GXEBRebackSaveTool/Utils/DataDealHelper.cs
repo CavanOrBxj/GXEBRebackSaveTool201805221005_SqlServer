@@ -429,27 +429,6 @@ namespace GXEBRebackSaveTool.Utils
         }
 
 
-        //public MonitorPlatformMessage Serializable(string Msg)
-        //{
-        //    MonitorPlatformMessage tmp = new MonitorPlatformMessage();
-        //    string[] msgItem = Msg.Split('|');
-        //    if (msgItem.Length > 0)
-        //    {
-        //        tmp.FILENAME = msgItem[0].Split('~')[1].Split('.')[0];
-        //        tmp.SRVPHYSICALCODE = msgItem[1].Split('~')[1];
-        //        byte[] startIndex = new byte[4];
-        //        if (msgItem[2].Split('~')[1].Length > 0)
-        //        {
-        //            for (int i = 0; i < msgItem[2].Split('~')[1].Length / 2; i++)
-        //            {
-        //                startIndex[i] = (byte)Convert.ToInt32(msgItem[2].Split('~')[1].Substring(2 * i, 2), 16);
-        //            }
-        //        }
-        //        tmp.PACKSTARTINDEX = startIndex;
-        //    }
-        //    return tmp;
-        //}
-
 
         public void Serialize(string Msg)
         {
@@ -541,7 +520,7 @@ namespace GXEBRebackSaveTool.Utils
                         {
                             if (item.ToString() == tmp.AUDIOREBACKSERVERIP)
                             {
-                                OpenReceiveTool(tmp.AUDIOREBACKSERVERIP, Convert.ToInt32(tmp.AUDIOREBACKPORT));
+                                OpenReceiveTool(tmp.AUDIOREBACKSERVERIP, Convert.ToInt32(tmp.AUDIOREBACKPORT),SingletonInfo.GetInstance().FTPServer,SingletonInfo.GetInstance().FTPPort,SingletonInfo.GetInstance().FTPUserName,SingletonInfo.GetInstance().FTPPwd,SingletonInfo.GetInstance().ftppath);
                             }
                         }
 
@@ -617,7 +596,7 @@ namespace GXEBRebackSaveTool.Utils
         }
 
 
-        private void OpenReceiveTool(string ip,int port)
+        private void OpenReceiveTool(string ip, int port, string FTPServer, string FTPPort, string FTPUserName, string FTPPwd,string ftppath)
         {
             List<int> pid = new List<int>();
             Process[] PL = Process.GetProcessesByName("ReceviceFileTool");
@@ -633,7 +612,7 @@ namespace GXEBRebackSaveTool.Utils
 
             Process process = new Process();
             process.StartInfo.FileName = Directory.GetCurrentDirectory() + "\\AudioReceiveTool\\ReceviceFileTool";
-            process.StartInfo.Arguments = ip+" "+port.ToString();
+            process.StartInfo.Arguments = ip + " " + port.ToString() + " " + FTPServer + " " + FTPPort + " " + FTPUserName + " " + FTPPwd + " " + ftppath;
             process.StartInfo.UseShellExecute = true;
             process.StartInfo.WorkingDirectory = Directory.GetCurrentDirectory() + "\\AudioReceiveTool";
 
