@@ -175,9 +175,6 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="gxreback.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="HPSockertx64\ssl-cert\ca.crt" />
     <None Include="HPSockertx64\ssl-cert\ca.key" />
     <None Include="HPSockertx64\ssl-cert\ca.pem" />

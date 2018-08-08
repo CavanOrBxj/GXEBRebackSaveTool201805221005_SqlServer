@@ -133,8 +133,8 @@ namespace GXEBRebackSaveTool
             SingletonInfo.GetInstance().FTPPort = ini.ReadValue("Reback", "FTPPort");
             SingletonInfo.GetInstance().FTPUserName = ini.ReadValue("Reback", "FTPUserName");
             SingletonInfo.GetInstance().FTPPwd = ini.ReadValue("Reback", "FTPPwd");
-            string tmpftppath = ini.ReadValue("Reback", "ftppath").Split(':')[1];
-            SingletonInfo.GetInstance().ftppath =tmpftppath.Remove(0,1); 
+         //   string tmpftppath = ini.ReadValue("Reback", "ftppath").Split(':')[1];
+          //  SingletonInfo.GetInstance().ftppath =tmpftppath.Remove(0,1); 
 
 
             btnStart_Click(null,null);
@@ -504,111 +504,110 @@ namespace GXEBRebackSaveTool
                     break;
                 case Equipment.FileName://文件调取
 
-                    //根据物理码找到 曾经有过的连接 和包头
+                  //由TS指令服务去实现了  但是接收还是它
 
-                    //  TransferCode select = (TransferCode)SendObject.DataEntity;
-                    TransferCode select = (TransferCode)SendObject.Extras;
-                    byte[] HeadDataFile = new byte[] { };
+                    //TransferCode select = (TransferCode)SendObject.Extras;
+                    //byte[] HeadDataFile = new byte[] { };
 
-                    if (!this.dataHelper.ClientHD.TryGetValue(select.SRVPHYSICALCODE, out HeadDataFile))
-                    {
-                        break;
-                    }
-                    List<byte> SendCommandFilesList2 = new List<byte>();
-                    SendCommandFilesList2.Add(38);
+                    //if (!this.dataHelper.ClientHD.TryGetValue(select.SRVPHYSICALCODE, out HeadDataFile))
+                    //{
+                    //    break;
+                    //}
+                    //List<byte> SendCommandFilesList2 = new List<byte>();
+                    //SendCommandFilesList2.Add(38);
 
-                    for (int k = 0; k < 9; k++)
-                    {
-                        SendCommandFilesList2.Add(HeadDataFile[1 + k]);//9位资源码
-                    }
-                    SendCommandFilesList2.Add(HeadDataFile[16]);//协议版本号
+                    //for (int k = 0; k < 9; k++)
+                    //{
+                    //    SendCommandFilesList2.Add(HeadDataFile[1 + k]);//9位资源码
+                    //}
+                    //SendCommandFilesList2.Add(HeadDataFile[16]);//协议版本号
 
-                    SendCommandFilesList2.Add(0);//预留字段
-                    //补全整个发送帧
-                    for (int i = 0; i < 55; i++)
-                    {
-                        SendCommandFilesList2.Add(0);
-                    }
+                    //SendCommandFilesList2.Add(0);//预留字段
+                    ////补全整个发送帧
+                    //for (int i = 0; i < 55; i++)
+                    //{
+                    //    SendCommandFilesList2.Add(0);
+                    //}
 
 
-                    byte[] sendcommandFile = SendCommandFilesList2.ToArray();
-                    sendcommandFile[12] = (byte)Convert.ToInt32("10", 16);
+                    //byte[] sendcommandFile = SendCommandFilesList2.ToArray();
+                    //sendcommandFile[12] = (byte)Convert.ToInt32("10", 16);
 
-                    string datalenthFile = (50).ToString("x").PadLeft(4, '0');
-                    sendcommandFile[12] = (byte)Convert.ToInt32("03", 16);
-                    sendcommandFile[13] = (byte)Convert.ToInt32(datalenthFile.Substring(2, 2), 16);
-                    sendcommandFile[14] = (byte)Convert.ToInt32(datalenthFile.Substring(0, 2), 16);
-                    sendcommandFile[15] = (byte)Convert.ToInt32("17", 16);
-                    sendcommandFile[16] = (byte)Convert.ToInt32("03", 16);
-                    sendcommandFile[17] = (byte)24;
-                    string pp2 = select.FILENAME.Substring(0, 15);
-                    byte[] array2 = Encoding.ASCII.GetBytes(pp2);
-                    for (int i = 0; i < array2.Length; i++)
-                    {//默认长度为15
-                        sendcommandFile[18 + i] = array2[i];
-                    }
-                    string pp = select.FILENAME.Substring(15, 18);
-                    byte[] array = new byte[pp.Length / 2];
-                    for (int j = 0; j < pp.Length / 2; j++)
-                    {
-                        //默认长度为9
-                        array[j] = Convert.ToByte(pp.Substring(2 * j, 2).ToString(), 16);
-                    }
+                    //string datalenthFile = (50).ToString("x").PadLeft(4, '0');
+                    //sendcommandFile[12] = (byte)Convert.ToInt32("03", 16);
+                    //sendcommandFile[13] = (byte)Convert.ToInt32(datalenthFile.Substring(2, 2), 16);
+                    //sendcommandFile[14] = (byte)Convert.ToInt32(datalenthFile.Substring(0, 2), 16);
+                    //sendcommandFile[15] = (byte)Convert.ToInt32("17", 16);
+                    //sendcommandFile[16] = (byte)Convert.ToInt32("03", 16);
+                    //sendcommandFile[17] = (byte)24;
+                    //string pp2 = select.FILENAME.Substring(0, 15);
+                    //byte[] array2 = Encoding.ASCII.GetBytes(pp2);
+                    //for (int i = 0; i < array2.Length; i++)
+                    //{//默认长度为15
+                    //    sendcommandFile[18 + i] = array2[i];
+                    //}
+                    //string pp = select.FILENAME.Substring(15, 18);
+                    //byte[] array = new byte[pp.Length / 2];
+                    //for (int j = 0; j < pp.Length / 2; j++)
+                    //{
+                    //    //默认长度为9
+                    //    array[j] = Convert.ToByte(pp.Substring(2 * j, 2).ToString(), 16);
+                    //}
 
-                    for (int i = 0; i < 9; i++)
-                    {
-                        sendcommandFile[33 + i] = array[i];
-                    }
+                    //for (int i = 0; i < 9; i++)
+                    //{
+                    //    sendcommandFile[33 + i] = array[i];
+                    //}
 
-                    sendcommandFile[42] = (byte)Convert.ToInt32("21", 16);
-                    sendcommandFile[43] = (byte)Convert.ToInt32("03", 16);
-                    sendcommandFile[44] = (byte)4;
-                    for (int i = 0; i < 4; i++)
-                    {
-                        sendcommandFile[45 + i] = select.PACKSTARTINDEX[i];
-                    }
+                    //sendcommandFile[42] = (byte)Convert.ToInt32("21", 16);
+                    //sendcommandFile[43] = (byte)Convert.ToInt32("03", 16);
+                    //sendcommandFile[44] = (byte)4;
+                    //for (int i = 0; i < 4; i++)
+                    //{
+                    //    sendcommandFile[45 + i] = select.PACKSTARTINDEX[i];
+                    //}
 
-                    sendcommandFile[49] = (byte)Convert.ToInt32("39", 16);
-                    sendcommandFile[50] = (byte)Convert.ToInt32("03", 16);
-                    sendcommandFile[51] = (byte)1;
-                    sendcommandFile[52] = (byte)select.Audio_reback_mode;
+                    //sendcommandFile[49] = (byte)Convert.ToInt32("39", 16);
+                    //sendcommandFile[50] = (byte)Convert.ToInt32("03", 16);
+                    //sendcommandFile[51] = (byte)1;
+                    //sendcommandFile[52] = (byte)select.Audio_reback_mode;
 
-                    sendcommandFile[53] = (byte)Convert.ToInt32("14", 16);
-                    sendcommandFile[54] = (byte)Convert.ToInt32("03", 16);
-                    sendcommandFile[55] = (byte)4;
+                    //sendcommandFile[53] = (byte)Convert.ToInt32("14", 16);
+                    //sendcommandFile[54] = (byte)Convert.ToInt32("03", 16);
+                    //sendcommandFile[55] = (byte)4;
 
-                    for (int i = 0; i < 4; i++)
-                    {
-                        sendcommandFile[56 + i] = (byte)(Convert.ToInt32(select.AUDIOREBACKSERVERIP.Split('.')[i]));
-                    }
+                    //for (int i = 0; i < 4; i++)
+                    //{
+                    //    sendcommandFile[56 + i] = (byte)(Convert.ToInt32(select.AUDIOREBACKSERVERIP.Split('.')[i]));
+                    //}
 
-                    sendcommandFile[60] = (byte)Convert.ToInt32("15", 16);
-                    sendcommandFile[61] = (byte)Convert.ToInt32("03", 16);
-                    sendcommandFile[62] = (byte)2;
-                    string porttmp = select.AUDIOREBACKPORT.ToString("x").PadLeft(4, '0');
-                    sendcommandFile[63] = (byte)Convert.ToInt32(porttmp.Substring(2, 2), 16);
-                    sendcommandFile[64] = (byte)Convert.ToInt32(porttmp.Substring(0, 2), 16);
+                    //sendcommandFile[60] = (byte)Convert.ToInt32("15", 16);
+                    //sendcommandFile[61] = (byte)Convert.ToInt32("03", 16);
+                    //sendcommandFile[62] = (byte)2;
+                    //string porttmp = select.AUDIOREBACKPORT.ToString("x").PadLeft(4, '0');
+                    //sendcommandFile[63] = (byte)Convert.ToInt32(porttmp.Substring(2, 2), 16);
+                    //sendcommandFile[64] = (byte)Convert.ToInt32(porttmp.Substring(0, 2), 16);
 
-                    sendcommandFile = HexHelper.crc16(sendcommandFile, 12);
-
+                    //sendcommandFile = HexHelper.crc16(sendcommandFile, 12);
 
 
 
-                    IntPtr connIdFiletransfer = default(IntPtr);
-                    if (this.dataHelper.Clients.TryGetValue(select.SRVPHYSICALCODE, out connIdFiletransfer))
-                    {
-                        byte[] bytes = sendcommandFile;
 
-                        string dadada = "";
-                        for (int i = 0; i < bytes.Length; i++)
-                        {
-                            dadada += bytes[i].ToString("X2");
-                        }
+                    //IntPtr connIdFiletransfer = default(IntPtr);
+                    //if (this.dataHelper.Clients.TryGetValue(select.SRVPHYSICALCODE, out connIdFiletransfer))
+                    //{
+                    //    byte[] bytes = sendcommandFile;
 
-                        this.netServer.Send(connIdFiletransfer, bytes, bytes.Length);
-                        //日志打印  20180305
-                        log.Info("录音文件调取指令已发送");  
-                    }
+                    //    string dadada = "";
+                    //    for (int i = 0; i < bytes.Length; i++)
+                    //    {
+                    //        dadada += bytes[i].ToString("X2");
+                    //    }
+
+                    //    this.netServer.Send(connIdFiletransfer, bytes, bytes.Length);
+                    //    //日志打印  20180305
+                    //    log.Info("录音文件调取指令已发送");  
+                    //}
 
                     break;
                 case Equipment.TTS://文本转语音

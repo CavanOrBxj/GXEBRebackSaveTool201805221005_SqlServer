@@ -520,17 +520,20 @@ namespace GXEBRebackSaveTool.Utils
                         {
                             if (item.ToString() == tmp.AUDIOREBACKSERVERIP)
                             {
-                                OpenReceiveTool(tmp.AUDIOREBACKSERVERIP, Convert.ToInt32(tmp.AUDIOREBACKPORT),SingletonInfo.GetInstance().FTPServer,SingletonInfo.GetInstance().FTPPort,SingletonInfo.GetInstance().FTPUserName,SingletonInfo.GetInstance().FTPPwd,SingletonInfo.GetInstance().ftppath);
+                                //OpenReceiveTool(tmp.AUDIOREBACKSERVERIP, Convert.ToInt32(tmp.AUDIOREBACKPORT),SingletonInfo.GetInstance().FTPServer,SingletonInfo.GetInstance().FTPPort,SingletonInfo.GetInstance().FTPUserName,SingletonInfo.GetInstance().FTPPwd,SingletonInfo.GetInstance().ftppath);
+                             
+                                OpenReceiveTool(tmp.AUDIOREBACKSERVERIP, Convert.ToInt32(tmp.AUDIOREBACKPORT), SingletonInfo.GetInstance().FTPServer, SingletonInfo.GetInstance().FTPPort, SingletonInfo.GetInstance().FTPUserName, SingletonInfo.GetInstance().FTPPwd, "\\");
                             }
                         }
 
 
                     }    
-                    tmp.Audio_reback_mode = 1;//1 UDP;2 TCP;3串口;其它值预留  现暂时默认设置为udp  20180129
-                    SendbackDetail sendbackDetail = new SendbackDetail();
-                    sendbackDetail.tag = Equipment.FileName;
-                    sendbackDetail.Extras = tmp;
-                    DataDealHelper.MyEvent(sendbackDetail);
+                    //由TS指令服务实现
+                    //tmp.Audio_reback_mode = 1;//1 UDP;2 TCP;3串口;其它值预留  现暂时默认设置为udp  20180129
+                    //SendbackDetail sendbackDetail = new SendbackDetail();
+                    //sendbackDetail.tag = Equipment.FileName;
+                    //sendbackDetail.Extras = tmp;
+                    //DataDealHelper.MyEvent(sendbackDetail);
                 }
             }
             else if (Msg.Contains("TTS"))
@@ -618,7 +621,7 @@ namespace GXEBRebackSaveTool.Utils
 
             process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
             process.Start();
-        
+            log.Error("打开接收工具");
         }
 
         public List<string> DecId2Physical(List<int> DeviceId)

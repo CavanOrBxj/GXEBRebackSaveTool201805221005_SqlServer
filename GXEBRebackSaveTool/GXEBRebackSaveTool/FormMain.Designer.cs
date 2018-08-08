@@ -122,7 +122,7 @@
             // button1
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button1.Location = new System.Drawing.Point(484, 266);
+            this.button1.Location = new System.Drawing.Point(617, 272);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(107, 37);
             this.button1.TabIndex = 47;
@@ -139,7 +139,7 @@
             // button2
             // 
             this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button2.Location = new System.Drawing.Point(599, 334);
+            this.button2.Location = new System.Drawing.Point(617, 334);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(107, 37);
             this.button2.TabIndex = 48;
@@ -151,7 +151,7 @@
             // button3
             // 
             this.button3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button3.Location = new System.Drawing.Point(443, 433);
+            this.button3.Location = new System.Drawing.Point(595, 443);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(167, 37);
             this.button3.TabIndex = 49;
@@ -163,7 +163,7 @@
             // button4
             // 
             this.button4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button4.Location = new System.Drawing.Point(549, 390);
+            this.button4.Location = new System.Drawing.Point(617, 390);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(145, 37);
             this.button4.TabIndex = 50;
