@@ -58,7 +58,7 @@
             // btnUpdateLocalHost
             // 
             this.btnUpdateLocalHost.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnUpdateLocalHost.Location = new System.Drawing.Point(299, 502);
+            this.btnUpdateLocalHost.Location = new System.Drawing.Point(385, 502);
             this.btnUpdateLocalHost.Name = "btnUpdateLocalHost";
             this.btnUpdateLocalHost.Size = new System.Drawing.Size(107, 37);
             this.btnUpdateLocalHost.TabIndex = 39;
@@ -91,7 +91,7 @@
             // btnStart
             // 
             this.btnStart.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnStart.Location = new System.Drawing.Point(416, 502);
+            this.btnStart.Location = new System.Drawing.Point(566, 502);
             this.btnStart.Name = "btnStart";
             this.btnStart.Size = new System.Drawing.Size(107, 37);
             this.btnStart.TabIndex = 44;
@@ -139,7 +139,7 @@
             // button2
             // 
             this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button2.Location = new System.Drawing.Point(599, 334);
+            this.button2.Location = new System.Drawing.Point(484, 320);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(107, 37);
             this.button2.TabIndex = 48;
@@ -151,18 +151,19 @@
             // button3
             // 
             this.button3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button3.Location = new System.Drawing.Point(549, 503);
+            this.button3.Location = new System.Drawing.Point(484, 205);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(167, 37);
             this.button3.TabIndex = 49;
             this.button3.Text = "文本转语音_测试指令";
             this.button3.UseVisualStyleBackColor = true;
+            this.button3.Visible = false;
             this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
             // button4
             // 
             this.button4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button4.Location = new System.Drawing.Point(549, 390);
+            this.button4.Location = new System.Drawing.Point(484, 372);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(145, 37);
             this.button4.TabIndex = 50;

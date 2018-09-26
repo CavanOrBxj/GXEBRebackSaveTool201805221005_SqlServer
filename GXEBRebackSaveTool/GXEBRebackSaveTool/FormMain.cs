@@ -26,9 +26,7 @@ namespace GXEBRebackSaveTool
         private System.Timers.Timer dbTimer;  //定时存储到数据库
 
         private bool isServerRun;
-        private bool saveDataToLog;
-
-     
+        private bool saveDataToLog;    
 
         private IMessageConsumer m_consumer; //消费者
 
@@ -102,30 +100,45 @@ namespace GXEBRebackSaveTool
 
         private void FormMain_Load(object sender, EventArgs e)
         {
-            FormMain.m_mq = new MQ();
-            saveDataToLog = string.Equals(bool.TrueString, System.Configuration.ConfigurationManager.AppSettings["SaveDataToLog"], StringComparison.CurrentCultureIgnoreCase);
 
-            //初始化数据解析类
-            bool iniCheck = CheckIniConfig();
-            DataBase = new DBHelper();
-            dataHelper = new DataDealHelper(DataBase);
+            try
+            {
+                FormMain.m_mq = new MQ();
+                saveDataToLog = string.Equals(bool.TrueString, System.Configuration.ConfigurationManager.AppSettings["SaveDataToLog"], StringComparison.CurrentCultureIgnoreCase);
 
-            //初始化处理线程
-            dealThread = new Thread(dataHelper.DealStatus);
-            saveThread = new Thread(dataHelper.SaveStatus);
+                //初始化数据解析类
+                bool iniCheck = CheckIniConfig();
+                DataBase = new DBHelper();
+                dataHelper = new DataDealHelper(DataBase);
 
-            textTcpPort.Text = ini.ReadValue("LocalHost", "TCPLocalPort");
-            textUdpPort.Text = ini.ReadValue("LocalHost", "UDPLocalPort");
+                textTcpPort.Text = ini.ReadValue("LocalHost", "TCPLocalPort");
+                textUdpPort.Text = ini.ReadValue("LocalHost", "UDPLocalPort");
 
-            //初始化存储数据库的计时器（5秒更新一次数据库）
-            dbTimer = new System.Timers.Timer(10000);
-            dbTimer.AutoReset = true;
-            dbTimer.Elapsed += DbTimer_Elapsed;
+                SingletonInfo.GetInstance().ProtocolCode = ini.ReadValue("ProtocolType", "type");
 
-            EquipmentHelper.MyEvent += new EquipmentHelper.MyDelegate(SendDataResponse);
-            DataDealHelper.MyEvent += new DataDealHelper.MyDelegate(SendDataResponse);
 
-            this.timercounter = 0;
+                //初始化处理线程
+                dealThread = new Thread(dataHelper.DealStatus);
+                saveThread = new Thread(dataHelper.SaveStatus);
+
+
+
+
+                //初始化存储数据库的计时器（5秒更新一次数据库）
+                dbTimer = new System.Timers.Timer(10000);
+                dbTimer.AutoReset = true;
+                dbTimer.Elapsed += DbTimer_Elapsed;
+
+                EquipmentHelper.MyEvent += new EquipmentHelper.MyDelegate(SendDataResponse);
+                DataDealHelper.MyEvent += new DataDealHelper.MyDelegate(SendDataResponse);
+
+                this.timercounter = 0;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());  
+            }
+           
         }
 
         void EquipmentHelper_MyEvent(object data)

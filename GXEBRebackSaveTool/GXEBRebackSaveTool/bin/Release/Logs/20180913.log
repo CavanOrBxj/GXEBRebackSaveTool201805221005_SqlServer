@@ -1,0 +1,50 @@
+2018-09-13 08:54:15,447 [1] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - TCP服务器关闭
+2018-09-13 08:54:15,624 [1] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - UDP服务器关闭
+2018-09-13 09:39:25,545 [1] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - TCP服务器关闭
+2018-09-13 09:39:25,725 [1] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - UDP服务器关闭
+2018-09-13 11:02:22,626 [14] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 新客户端接入，host：192.168.4.56(41498)
+2018-09-13 11:02:25,773 [14] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 客户端连接关闭，状态：Close  错误码：0
+2018-09-13 11:02:25,863 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-160
+2018-09-13 11:02:32,569 [15] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 新客户端接入，host：192.168.4.56(41502)
+2018-09-13 11:02:32,578 [15] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 客户端连接关闭，状态：Close  错误码：0
+2018-09-13 11:02:32,590 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-160
+2018-09-13 11:02:42,593 [14] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 新客户端接入，host：192.168.4.56(41505)
+2018-09-13 11:02:42,607 [16] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 客户端连接关闭，状态：Close  错误码：0
+2018-09-13 11:02:42,638 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-160
+2018-09-13 11:02:52,552 [16] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 新客户端接入，host：192.168.4.56(41508)
+2018-09-13 11:02:52,559 [17] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 客户端连接关闭，状态：Close  错误码：0
+2018-09-13 11:02:52,577 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-160
+2018-09-13 11:03:02,617 [17] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 新客户端接入，host：192.168.4.56(41511)
+2018-09-13 11:03:02,622 [14] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 客户端连接关闭，状态：Close  错误码：0
+2018-09-13 11:03:02,716 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-160
+2018-09-13 11:03:12,578 [14] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 新客户端接入，host：192.168.4.56(41514)
+2018-09-13 11:03:12,594 [15] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 客户端连接关闭，状态：Close  错误码：0
+2018-09-13 11:03:12,651 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-160
+2018-09-13 11:03:22,561 [15] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 新客户端接入，host：192.168.4.56(41517)
+2018-09-13 11:03:22,570 [15] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 客户端连接关闭，状态：Close  错误码：0
+2018-09-13 11:03:22,587 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-160
+2018-09-13 11:03:32,551 [16] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 新客户端接入，host：192.168.4.56(41520)
+2018-09-13 11:03:32,556 [14] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 客户端连接关闭，状态：Close  错误码：0
+2018-09-13 11:03:32,625 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-160
+2018-09-13 11:03:42,566 [14] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 新客户端接入，host：192.168.4.56(41523)
+2018-09-13 11:04:00,023 [15] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 新客户端接入，host：192.168.4.56(41526)
+2018-09-13 11:04:00,023 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-160
+2018-09-13 11:04:01,947 [15] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 客户端连接关闭，状态：Close  错误码：0
+2018-09-13 11:04:03,477 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-160
+2018-09-13 11:04:03,477 [17] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 新客户端接入，host：192.168.4.56(41529)
+2018-09-13 11:04:08,303 [14] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 客户端连接关闭，状态：Close  错误码：0
+2018-09-13 11:04:08,305 [14] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 客户端连接关闭，状态：Close  错误码：0
+2018-09-13 11:04:08,403 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-160
+2018-09-13 11:04:12,542 [18] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 新客户端接入，host：192.168.4.56(41532)
+2018-09-13 11:04:42,246 [15] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 新客户端接入，host：192.168.4.56(41538)
+2018-09-13 11:04:42,271 [14] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 新客户端接入，host：192.168.4.56(41535)
+2018-09-13 11:04:43,900 [14] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 新客户端接入，host：192.168.4.56(41541)
+2018-09-13 11:04:45,162 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-160
+2018-09-13 11:04:45,650 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-160
+2018-09-13 11:04:46,659 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-160
+2018-09-13 11:04:46,662 [20] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 客户端连接关闭，状态：Close  错误码：0
+2018-09-13 11:04:47,206 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-160
+2018-09-13 11:04:47,507 [15] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 客户端连接关闭，状态：Close  错误码：0
+2018-09-13 11:04:49,341 [11] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 客户端连接关闭，状态：Close  错误码：0
+2018-09-13 11:04:50,147 [15] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 客户端连接关闭，状态：Close  错误码：0
+2018-09-13 11:04:52,567 [11] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 新客户端接入，host：192.168.4.56(41545)

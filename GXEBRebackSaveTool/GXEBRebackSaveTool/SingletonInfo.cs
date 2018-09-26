@@ -22,6 +22,11 @@ namespace GXEBRebackSaveTool
 
         public int FileID;//文件ID  平台发送文本到服务 服务生成一个文件ID（每次自增 最大65535）  
 
+        /// <summary>
+        /// 协议类型码    1表示国标 2表示图南
+        /// </summary>
+        public string ProtocolCode;
+
         private SingletonInfo()                                                                 
         {
             factorycode = ""; //
@@ -30,6 +35,7 @@ namespace GXEBRebackSaveTool
          //   MonitorPlatformMessageList = new List<MonitorPlatformMessage>();
             HistoryHeaderData = new Dictionary<string, byte[]>();
             FileID = 0;
+            ProtocolCode ="";
 
         }
 

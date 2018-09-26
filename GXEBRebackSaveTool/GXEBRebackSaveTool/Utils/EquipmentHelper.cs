@@ -85,6 +85,33 @@ namespace GXEBRebackSaveTool.Utils
             return null;
         }
 
+
+
+        public static Dictionary<EquipmentNS, byte[]> HandleData_NS(byte[] data, out string msg)
+        {
+            
+            msg = string.Empty;
+            byte[] dataBodytmp = data.Skip(11).ToArray();
+            byte[] dataBody = dataBodytmp.Take(data.Length - 4).ToArray();
+            if (data[0] == 0xfe && data[1] == 0xfd)
+            {
+                //判断CRC是否对应
+
+                var array1 = CRC32.GetCRC32(data.Take(data.Length-4).ToArray());
+                var array2 = data.Skip(data.Length - 4).ToArray();
+                if (array1.EqualsArray(array2))
+                {
+                    return HandleAutoReportNS(dataBody);
+                }
+                msg = "CRC数据解析错误";
+            }
+            else
+            {
+                msg = "帧头数据解析错误";
+            }
+            return null;
+        }
+
         /// <summary>
         /// 解析帧头信息
         /// </summary>
@@ -151,8 +178,6 @@ namespace GXEBRebackSaveTool.Utils
 
         private static string GetEquipmentValueString(Equipment eq, byte[] eqData)
         {
-           // return GetEquipmentValueString(eq, GetEquipmentValue(eq, eqData));
-
             return null;
         }
 
@@ -491,6 +516,142 @@ namespace GXEBRebackSaveTool.Utils
             }
         }
 
+        public static object GetNSEquipmentValue(EquipmentNS eq, byte[] eqData, NSEquipmentDetail ob)
+        {
+            try
+            {
+                switch (eq)
+                {
+                    case EquipmentNS.DeviceTypeCode:
+                      return   ConvertHelper.Byte2int(eqData).ToString();
+                      
+                    case EquipmentNS.DTMBStatus:
+                        return eqData[0].ToString() + ";" + eqData[1].ToString();
+
+                    case EquipmentNS.DTMB_FreqInfo:
+                        return ConvertHelper.GetDataLenth(eqData).ToString();
+
+                    case EquipmentNS.DVBCStatus:
+
+                        return eqData[0].ToString() + ";" + eqData[1].ToString();
+                    case EquipmentNS.DVBC_FreqInfo:
+                        string MFreTMP= ConvertHelper.GetDataLenth(eqData.Take(4).ToArray()).ToString();
+                        string SymbolRatetmp = ConvertHelper.GetDataLenth(eqData .Skip(4).Take(4).ToArray()).ToString();
+                        string QAMtmp = eqData.Skip(8).Take(1).ToArray()[0].ToString();
+
+                        return MFreTMP + ";" + SymbolRatetmp + ";" + QAMtmp;
+
+                    case EquipmentNS.FaultCode:
+
+                        return eqData[0].ToString();
+                    case EquipmentNS.FMStatus:
+                        return eqData[0].ToString() + ";" + eqData[1].ToString();
+                    case EquipmentNS.FM_CurrentFreqInfo:
+
+                        //数据有3个字节 实际只用到两个 
+                        string IF = eqData.Skip(1).Take(1).ToArray()[0].ToString() + "." + eqData.Skip(1+1).Take(1).ToArray()[0].ToString();
+                        string PF = eqData.Skip(4).Take(1).ToArray()[0].ToString() + "." + eqData.Skip(5).Take(1).ToArray()[0].ToString();
+                        return IF + ";" + PF;
+
+                    case EquipmentNS.FM_FreqScanList:
+                        int FreCount = eqData[0];
+                        string strlist = "";
+                        for (int i = 0; i < FreCount; i++)
+                        {
+                            string fre = "";
+                            string freNo = eqData[1 + 5 * i].ToString();
+                            string priority = eqData[1 + 5 * i + 1].ToString();
+                            string fretmp = eqData.Skip(1 + 5 * i + 1 + 1+1).Take(1).ToArray()[0].ToString() + "." + eqData.Skip(1 + 5 * i + 1 + 1 + 1+1).Take(1).ToArray()[0].ToString();
+
+                            fre = freNo + "," + priority + "," + fretmp;
+                            strlist += ";" + fre;
+                        }
+
+                        return  strlist.Substring(1, strlist.Length-1);
+
+                    case EquipmentNS.FM_KeepOrderInfo:
+
+                        string onoff = eqData[0].ToString();
+
+                        string keepcycle = "";
+                        if (onoff == "0")
+                        {
+                            //禁用 维持周期 为0
+                            keepcycle = "0";
+                        }
+                        else
+                        {
+                            keepcycle = ConvertHelper.Byte2int(eqData.Skip(1).Take(2).ToArray()).ToString();
+                        }
+
+                        return onoff + ";" + keepcycle;
+                    case EquipmentNS.HardwareVersionNum:
+                      return   ConvertHelper.Byte2wareVersion(eqData);
+                    case EquipmentNS.RebackInfo:
+                        int rebacktype = eqData[0];
+                        string RebackInfotmp = "";
+                        switch (rebacktype)
+                        {
+                            case 1:
+                                //IP+端口
+                                string iptmp = ConvertHelper.Bytes2IP(eqData.Skip(1).Take(4).ToArray());
+                                string porttmp = ConvertHelper.Byte2int(eqData.Skip(5).Take(2).ToArray()).ToString();
+                                RebackInfotmp = iptmp + ";" + porttmp;
+                                break;
+                            case 2:
+                                //域名+端口
+                                string domaintmp = System.Text.Encoding.UTF8.GetString(eqData.Skip(1).Take(eqData.Length-3).ToArray());
+                                string porttmp1 = ConvertHelper.Byte2int(eqData.Skip(eqData.Length-2).Take(2).ToArray()).ToString();
+                                RebackInfotmp = domaintmp + ";" + porttmp1;
+
+                                break;
+                            case 3:
+                                //11位电话号码
+                                RebackInfotmp= ConvertHelper.Byte2PhoneNum(eqData.Skip(1).Take(eqData.Length-1).ToArray());
+                                break;
+
+                        }
+                        return RebackInfotmp;
+
+                    case EquipmentNS.ResourceCode:
+                        string resourcecodetmp = "";
+                        resourcecodetmp= ConvertHelper.bcd2Str(eqData);
+                        resourcecodetmp = resourcecodetmp.Substring(1, resourcecodetmp.Length-1);
+                        return resourcecodetmp;
+
+                    case EquipmentNS.SoftwareVersionNum:
+                        return ConvertHelper.Byte2wareVersion(eqData);
+                    case EquipmentNS.srv_physical_code:
+                       return   ConvertHelper.bcd2Str(eqData);
+                    case EquipmentNS.TerminalAddressInfo:
+
+                     return    ConvertHelper.Bytes2IP(eqData.Take(4).ToArray()) +";"+ ConvertHelper.Bytes2IP(eqData.Skip(4).Take(4).ToArray())+ ";"+ ConvertHelper.Bytes2IP(eqData.Skip(8).Take(4).ToArray());
+                       
+                    case EquipmentNS.TerminalVolume:
+                        int volumntmp = eqData[0];
+                        if (volumntmp > 100)
+                        {
+                            return "--";
+                        }
+                        else
+                        {
+                            return volumntmp.ToString();
+                        }
+                    case EquipmentNS.WorkStatus:
+                        string str = eqData[0].ToString();
+                        return str;
+
+                    case EquipmentNS.Heartbeat:
+                        return ConvertHelper.bcd2Str(eqData);
+                }
+                return eqData;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         public static string GetFramHeaderValueString(FrameHeaderEnum fh, byte[] eqData)
         {
             try
@@ -536,6 +697,39 @@ namespace GXEBRebackSaveTool.Utils
             }
             return data;
         }
+
+        private static Dictionary<EquipmentNS, byte[]> HandleAutoReportNS(byte[] dataBody)
+        {
+            Dictionary<EquipmentNS, byte[]> data = new Dictionary<EquipmentNS, byte[]>();
+            int datatagetnum = ConvertHelper.Byte2int(dataBody.Skip(12).Take(2).ToArray());
+
+            int PackageType = ConvertHelper.Byte2int(dataBody.Skip(12 + 2 + 12 * datatagetnum).Take(1).ToArray());
+
+            switch (PackageType)
+            {
+                case 0x10:
+                  
+                    data.Add(EquipmentNS.Heartbeat, dataBody.Skip(12 + 2 + 12 * datatagetnum+7).Take(5).ToArray());
+                    break;
+                case 0x11:
+                    int businessdatanum = ConvertHelper.Byte2int(dataBody.Skip(12 + 2 + 12 * datatagetnum + 1).Take(2).ToArray());
+                    int describeLength = ConvertHelper.Byte2int(dataBody.Skip(12 + 2 + 12 * datatagetnum + 1 + 2 + 1).Take(2).ToArray());
+                    byte[] statusdata = dataBody.Skip(12 + 2 + 12 * datatagetnum + 1 + 2 + 1 + 2 + describeLength + 1).Take(businessdatanum - 1 - 2 - describeLength - 1).ToArray();
+
+                    int index = 0;
+                    while (index < statusdata.Length)
+                    {
+                        int length = statusdata[index + 1];
+                        var eq = (EquipmentNS)statusdata[index];
+                        var dataOrder = statusdata.Skip(index + 2).Take(length).ToArray();
+                        data.Add(eq, dataOrder);
+                        index += length + 2;
+                    }
+                    break;
+            }
+            return data;
+        }
+
 
         /// <summary>
         /// 解析帧头信息（未启用）

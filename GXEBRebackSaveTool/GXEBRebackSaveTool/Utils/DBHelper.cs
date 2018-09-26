@@ -68,7 +68,6 @@ namespace GXEBRebackSaveTool.Utils
             {
                 if (conn.State != ConnectionState.Open)
                     conn.Open();
-               // sd = new MySqlDataAdapter("SELECT SRV_ID,SRV_RMT_TIME,SRV_RMT_STATUS,SRV_PHYSICAL_CODE FROM Srv WITH(NOLOCK)", conn);
                 sd = new SqlDataAdapter("SELECT SRV_ID,SRV_RMT_TIME,SRV_RMT_STATUS,SRV_PHYSICAL_CODE FROM Srv WITH(NOLOCK)", conn);
                 SqlCommandBuilder scb = new SqlCommandBuilder(sd);
                 sd.UpdateCommand = scb.GetUpdateCommand();
@@ -82,22 +81,75 @@ namespace GXEBRebackSaveTool.Utils
                 sd.Fill(dataTable);
 
 
-                if (dataTable.Rows.Count>0)//添加于20180116  SRV表中的数据来源？
+                if (dataTable.Rows.Count > 0)
                 {
-                   for (int i = 0; i < dt.Rows.Count; i++)
-                {
-                    dataTable.Rows[i].BeginEdit();
-                    var rows = dataTable.Select("SRV_PHYSICAL_CODE='" + dt.Rows[i]["srv_physical_code"] + "'");
-                    if (rows != null && rows.Length > 0)
+                    for (int i = 0; i < dt.Rows.Count; i++)
                     {
-                        rows[0]["SRV_RMT_TIME"] = DateTime.Parse(dt.Rows[i]["srv_time"].ToString());
-                        rows[0]["SRV_RMT_STATUS"] = "在线";
+                        dataTable.Rows[i].BeginEdit();
+                        var rows = dataTable.Select("SRV_PHYSICAL_CODE='" + dt.Rows[i]["srv_physical_code"] + "'");
+                        if (rows != null && rows.Length > 0)
+                        {
+                            rows[0]["SRV_RMT_TIME"] = DateTime.Parse(dt.Rows[i]["srv_time"].ToString());
+                            rows[0]["SRV_RMT_STATUS"] = "在线";
+                        }
+                        dataTable.Rows[i].EndEdit();
                     }
-                    dataTable.Rows[i].EndEdit();
+                    reslut = sd.Update(dataTable);
                 }
-                reslut = sd.Update(dataTable);
+
+            }
+            catch (Exception ex)
+            {
+                log.Error("批量更新设备在线状态发生异常", ex);
+            }
+            finally
+            {
+                dataTable.Clear();
+                sd.Dispose();
+                dataTable.Dispose();
+                conn.Close();
+            }
+            return reslut != -1;
+        }
+
+
+        public bool UpdateSrvEquipmentStatusBatch_Nation(NSEquipmentDetail selectone)
+        {
+            SqlDataAdapter sd = null;
+            DataTable dataTable = new DataTable();
+            int reslut = -1;
+            try
+            {
+                if (conn.State != ConnectionState.Open)
+                    conn.Open();
+                sd = new SqlDataAdapter("SELECT SRV_ID,SRV_RMT_TIME,SRV_RMT_STATUS,SRV_PHYSICAL_CODE FROM Srv WITH(NOLOCK)", conn);
+                SqlCommandBuilder scb = new SqlCommandBuilder(sd);
+                sd.UpdateCommand = scb.GetUpdateCommand();
+                sd.UpdateCommand = new SqlCommand("update Srv set SRV_RMT_TIME=@SRV_RMT_TIME, SRV_RMT_STATUS=@SRV_RMT_STATUS where SRV_PHYSICAL_CODE=@SRV_PHYSICAL_CODE", conn);
+                sd.UpdateCommand.Parameters.Add("@SRV_RMT_TIME", SqlDbType.DateTime, 255, "SRV_RMT_TIME");
+                sd.UpdateCommand.Parameters.Add("@SRV_RMT_STATUS", SqlDbType.VarChar, 255, "SRV_RMT_STATUS");
+                sd.UpdateCommand.Parameters.Add("@SRV_PHYSICAL_CODE", SqlDbType.VarChar, 255, "SRV_PHYSICAL_CODE");
+                sd.UpdateCommand.UpdatedRowSource = UpdateRowSource.None;
+
+                sd.UpdateBatchSize = 0;
+                sd.Fill(dataTable);
+
+
+                if (dataTable.Rows.Count > 0)
+                {
+                    
+                        dataTable.Rows[0].BeginEdit();
+                        var rows = dataTable.Select("SRV_PHYSICAL_CODE='" + selectone.Heartbeat + "'");
+                        if (rows != null && rows.Length > 0)
+                        {
+                        rows[0]["SRV_RMT_TIME"] = DateTime.Now;
+                        rows[0]["SRV_RMT_STATUS"] = "在线";
+                        }
+                        dataTable.Rows[0].EndEdit();
+                    
+                    reslut = sd.Update(dataTable);
                 }
-             
+
             }
             catch (Exception ex)
             {
@@ -168,6 +220,77 @@ namespace GXEBRebackSaveTool.Utils
             finally { conn.Close(); }
         }
 
+
+        public void BulkEquipmentDetailNation(DataTable dt)
+        {
+            if (dt == null || dt.Rows.Count == 0) return;
+
+            try
+            {
+                if (conn.State != ConnectionState.Open)
+                    conn.Open();
+                foreach (DataRow row in dt.Rows)
+                {
+                    try
+                    {
+                        SqlCommand cmd = new SqlCommand("UporInsertSrv_Status_Nation", conn);  //带事物处理
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.Add("@ResourceCode", SqlDbType.Char);
+                        cmd.Parameters.Add("@TerminalVolume", SqlDbType.Char);
+                        cmd.Parameters.Add("@TerminalAddressInfo", SqlDbType.Char);
+                        cmd.Parameters.Add("@RebackInfo", SqlDbType.Char);
+                        cmd.Parameters.Add("@srv_physical_code", SqlDbType.Char);
+                        cmd.Parameters.Add("@WorkStatus", SqlDbType.Char);
+                        cmd.Parameters.Add("@FaultCode", SqlDbType.Char);
+                        cmd.Parameters.Add("@DeviceTypeCode", SqlDbType.Char);
+                        cmd.Parameters.Add("@HardwareVersionNum", SqlDbType.Char);
+                        cmd.Parameters.Add("@SoftwareVersionNum", SqlDbType.Char);
+
+                        cmd.Parameters.Add("@FMStatus", SqlDbType.Char);
+                        cmd.Parameters.Add("@DVBCStatus", SqlDbType.Char);
+                        cmd.Parameters.Add("@DTMBStatus", SqlDbType.Char);
+                        cmd.Parameters.Add("@DVBC_FreqInfo", SqlDbType.Char);
+                        cmd.Parameters.Add("@DTMB_FreqInfo", SqlDbType.Char);
+                        cmd.Parameters.Add("@FM_FreqScanList", SqlDbType.Char);
+                        cmd.Parameters.Add("@FM_CurrentFreqInfo", SqlDbType.Char);
+                        cmd.Parameters.Add("@FM_KeepOrderInfo", SqlDbType.Char);
+
+
+                        //开始给添加的各个参数进行赋值操作  
+                        cmd.Parameters["@ResourceCode"].Value = row["ResourceCode"].ToString();
+
+                        cmd.Parameters["@TerminalVolume"].Value = row["TerminalVolume"].ToString();
+                        cmd.Parameters["@TerminalAddressInfo"].Value = row["TerminalAddressInfo"].ToString();
+                        cmd.Parameters["@RebackInfo"].Value = row["RebackInfo"].ToString();
+                        cmd.Parameters["@srv_physical_code"].Value = row["srv_physical_code"].ToString();
+                        cmd.Parameters["@WorkStatus"].Value = row["WorkStatus"].ToString();
+                        cmd.Parameters["@FaultCode"].Value = row["FaultCode"].ToString();
+                        cmd.Parameters["@DeviceTypeCode"].Value = row["DeviceTypeCode"].ToString();
+                        cmd.Parameters["@HardwareVersionNum"].Value = row["HardwareVersionNum"].ToString();
+                        cmd.Parameters["@SoftwareVersionNum"].Value = row["SoftwareVersionNum"].ToString();
+
+                        cmd.Parameters["@FMStatus"].Value = row["FMStatus"].ToString();
+                        cmd.Parameters["@DVBCStatus"].Value = row["DVBCStatus"].ToString();
+                        cmd.Parameters["@DTMBStatus"].Value = row["DTMBStatus"].ToString();
+                        cmd.Parameters["@DVBC_FreqInfo"].Value = row["DVBC_FreqInfo"].ToString();
+                        cmd.Parameters["@DTMB_FreqInfo"].Value = row["DTMB_FreqInfo"].ToString();
+                        cmd.Parameters["@FM_FreqScanList"].Value = row["FM_FreqScanList"].ToString();
+                        cmd.Parameters["@FM_CurrentFreqInfo"].Value = row["FM_CurrentFreqInfo"].ToString();
+                        cmd.Parameters["@FM_KeepOrderInfo"].Value = row["FM_KeepOrderInfo"].ToString();
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        log.Error("更新设备信息异常", ex);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Error("更新设备信息数据库异常", ex);
+            }
+            finally { conn.Close(); }
+        }
 
 
         public void BulkNewEquipmentDetail(DataTable dt)

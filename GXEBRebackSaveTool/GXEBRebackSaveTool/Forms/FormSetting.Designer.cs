@@ -55,15 +55,19 @@
             this.txtTopiName = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
             this.txtMQServer = new System.Windows.Forms.TextBox();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.cmb_protocoltype = new System.Windows.Forms.ComboBox();
+            this.label10 = new System.Windows.Forms.Label();
             this.gbSetting.SuspendLayout();
             this.groupHost.SuspendLayout();
             this.groupBox1.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnSet
             // 
             this.btnSet.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSet.Location = new System.Drawing.Point(270, 500);
+            this.btnSet.Location = new System.Drawing.Point(270, 576);
             this.btnSet.Name = "btnSet";
             this.btnSet.Size = new System.Drawing.Size(97, 31);
             this.btnSet.TabIndex = 14;
@@ -246,7 +250,7 @@
             // btnDBTest
             // 
             this.btnDBTest.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnDBTest.Location = new System.Drawing.Point(22, 500);
+            this.btnDBTest.Location = new System.Drawing.Point(22, 576);
             this.btnDBTest.Name = "btnDBTest";
             this.btnDBTest.Size = new System.Drawing.Size(97, 31);
             this.btnDBTest.TabIndex = 19;
@@ -320,11 +324,40 @@
             this.txtMQServer.TabIndex = 15;
             this.txtMQServer.TabStop = false;
             // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.cmb_protocoltype);
+            this.groupBox2.Controls.Add(this.label10);
+            this.groupBox2.Location = new System.Drawing.Point(22, 489);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(345, 76);
+            this.groupBox2.TabIndex = 21;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "协议设置";
+            // 
+            // cmb_protocoltype
+            // 
+            this.cmb_protocoltype.FormattingEnabled = true;
+            this.cmb_protocoltype.Location = new System.Drawing.Point(122, 30);
+            this.cmb_protocoltype.Name = "cmb_protocoltype";
+            this.cmb_protocoltype.Size = new System.Drawing.Size(181, 20);
+            this.cmb_protocoltype.TabIndex = 24;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(63, 34);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(29, 12);
+            this.label10.TabIndex = 16;
+            this.label10.Text = "协议";
+            // 
             // FormSetting
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(396, 543);
+            this.ClientSize = new System.Drawing.Size(396, 619);
+            this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.btnDBTest);
             this.Controls.Add(this.lblTip);
@@ -347,6 +380,8 @@
             this.groupHost.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -381,5 +416,8 @@
         private System.Windows.Forms.TextBox txtTopiName;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.TextBox txtMQServer;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.ComboBox cmb_protocoltype;
+        private System.Windows.Forms.Label label10;
     }
 }

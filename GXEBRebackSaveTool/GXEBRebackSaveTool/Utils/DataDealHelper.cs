@@ -27,8 +27,12 @@ namespace GXEBRebackSaveTool.Utils
         private ConcurrentDictionary<string, byte[]> clientsHeadData;
         private ConcurrentQueue<EquipmentSource> beforeAnalysisQueue;
         private ConcurrentQueue<EquipmentDetail> afterAnalysisQueue;
+
+        private ConcurrentQueue<NSEquipmentDetail> afterAnalysisQueue_NS;
         private DataTable dtStatus;
         private DataTable dtStatusNew;
+
+        private DataTable dtsrvStatus_national;
 
         private DBHelper db;
         private bool isRun = true;
@@ -50,17 +54,21 @@ namespace GXEBRebackSaveTool.Utils
 
         public DataDealHelper(DBHelper db = null)
         {
-            clientsConn = new ConcurrentDictionary<string, IntPtr>();
-            clientsHeadData = new ConcurrentDictionary<string, byte[]>();
-            beforeAnalysisQueue = new ConcurrentQueue<EquipmentSource>();
-            afterAnalysisQueue = new ConcurrentQueue<EquipmentDetail>();
-            this.db = db;
+            try
+            {
+                clientsConn = new ConcurrentDictionary<string, IntPtr>();
+                clientsHeadData = new ConcurrentDictionary<string, byte[]>();
+                beforeAnalysisQueue = new ConcurrentQueue<EquipmentSource>();
+                afterAnalysisQueue = new ConcurrentQueue<EquipmentDetail>();
+                afterAnalysisQueue_NS = new ConcurrentQueue<NSEquipmentDetail>();
+                this.db = db;
 
-            dtStatus = new DataTable("Srv_Status");
-            dtStatusNew = new DataTable("Srv_StatusGxNew");
+                dtStatus = new DataTable("Srv_Status");
+                dtStatusNew = new DataTable("Srv_StatusGxNew");
+                dtsrvStatus_national = new DataTable("srvStatus_national");
 
-            #region 初始化要存储的数据列
-            dtStatus.Columns.AddRange(new DataColumn[] {
+                #region 初始化要存储的数据列
+                dtStatus.Columns.AddRange(new DataColumn[] {
                 new DataColumn("devid", typeof(int)), new DataColumn("srv_physical_code", typeof(string)),
                 new DataColumn("powersupplystatus", typeof(string)), new DataColumn("powervoltage", typeof(string)),
                 new DataColumn("powercullent", typeof(string)), new DataColumn("powerconsumption", typeof(string)),
@@ -71,13 +79,13 @@ namespace GXEBRebackSaveTool.Utils
                 new DataColumn("devlogicid", typeof(string)), new DataColumn("devphyid", typeof(string)),
                 new DataColumn("monitorstatus", typeof(string)), new DataColumn("monitor_up_timer", typeof(string)),
                 new DataColumn("devrtc", typeof(string)), new DataColumn("srv_time", typeof(string)),});
-            dtStatusNew.Columns.AddRange(new DataColumn[] {
+                dtStatusNew.Columns.AddRange(new DataColumn[] {
                 new DataColumn("devid", typeof(int)), new DataColumn("srv_physical_code", typeof(string)),
                 new DataColumn("broadcaststate", typeof(string)), new DataColumn("voltage220", typeof(string)),
                 new DataColumn("fm_frelist1", typeof(string)), new DataColumn("fm_signalstrength1", typeof(string)),
                 new DataColumn("fm_frelist2", typeof(string)), new DataColumn("fm_signalstrength2", typeof(string)),
                 new DataColumn("logicaladdress", typeof(string)), new DataColumn("physicaladdress", typeof(string)),
-                new DataColumn("srv_time", typeof(string)), 
+                new DataColumn("srv_time", typeof(string)),
                 new DataColumn("playtype", typeof(string)), new DataColumn("versions", typeof(string)),
                 new DataColumn("digitaltv_radiofrequencymode", typeof(string)), new DataColumn("digitaltv_radiofrequencyfre", typeof(string)),
                 new DataColumn("broadcast_volume", typeof(string)), new DataColumn("currentmode_signalquality", typeof(string)),
@@ -87,14 +95,33 @@ namespace GXEBRebackSaveTool.Utils
                 new DataColumn("filename", typeof(string)), new DataColumn("recording_duration", typeof(string)),
                 new DataColumn("packs_totalnumber", typeof(string)), new DataColumn("rebackfiletype", typeof(string)),
                 new DataColumn("packstartindex", typeof(string)), new DataColumn("lastpacksnumber", typeof(string)),
-                new DataColumn("terminaltype", typeof(string)), 
+                new DataColumn("terminaltype", typeof(string)),
                 new DataColumn("longitude", typeof(string)), new DataColumn("latitude", typeof(string)),
                 new DataColumn("rebackmode", typeof(string)), new DataColumn("networkmode", typeof(string)),
                 new DataColumn("voltage24", typeof(string)), new DataColumn("voltage12", typeof(string)),
                 new DataColumn("amplifierelectric_current", typeof(string)), new DataColumn("localhost", typeof(string)),
                 new DataColumn("subnetmask", typeof(string)), new DataColumn("defaultgateway", typeof(string)),
                 new DataColumn("manufacturer_information", typeof(string)), });
-            #endregion
+
+                dtsrvStatus_national.Columns.AddRange(new DataColumn[] {
+                new DataColumn("ResourceCode", typeof(string)), new DataColumn("TerminalVolume", typeof(string)),
+                new DataColumn("TerminalAddressInfo", typeof(string)), 
+                new DataColumn("RebackInfo", typeof(string)), new DataColumn("srv_physical_code", typeof(string)),
+                new DataColumn("WorkStatus", typeof(string)), new DataColumn("FaultCode", typeof(string)),
+                new DataColumn("DeviceTypeCode", typeof(string)), new DataColumn("HardwareVersionNum", typeof(string)),
+                new DataColumn("SoftwareVersionNum", typeof(string)),
+                new DataColumn("FMStatus", typeof(string)), new DataColumn("DVBCStatus", typeof(string)),
+                new DataColumn("DTMBStatus", typeof(string)), new DataColumn("DVBC_FreqInfo", typeof(string)),
+                new DataColumn("DTMB_FreqInfo", typeof(string)), new DataColumn("FM_FreqScanList", typeof(string)),
+                new DataColumn("FM_CurrentFreqInfo", typeof(string)), 
+                new DataColumn("FM_KeepOrderInfo", typeof(string)), });
+                #endregion
+            }
+            catch (Exception ex)
+            {
+                Console.Write(ex.ToString());
+            }
+           
         }
 
         /// <summary>
@@ -117,22 +144,36 @@ namespace GXEBRebackSaveTool.Utils
                             dadada += " " + data.RawData[i].ToString("X2"); 
                         }
 
-                        if (data != null && data.RawData != null && data.RawData.Length > 0)
+                        if (SingletonInfo.GetInstance().ProtocolCode == "1")
                         {
-                            //解析数据
-                           // var dataNew = HandlerQueue(data.RawData); //解析数据
-
-                            var dataNew = HandlerQueue(data); //解析数据
-                            if (dataNew != null)
+                            //处理国标情况  20180913新增
+                            if (data != null && data.RawData != null && data.RawData.Length > 0)
                             {
-                                afterAnalysisQueue.Enqueue(dataNew);  //放入已解析队列
-                              //  clientsConn.AddOrUpdate(dataNew.PhysicalAddressFormat, data.ConnId, (key, value) => { return value = data.ConnId; });
-                                autoEvent.Set(); //通知saveThread
+                                var dataNew = HandlerQueue_NationalStandard(data); //解析数据
+                                if (dataNew != null)
+                                {
+                                    afterAnalysisQueue_NS.Enqueue(dataNew);  //放入已解析队列
+                                                                          //  clientsConn.AddOrUpdate(dataNew.PhysicalAddressFormat, data.ConnId, (key, value) => { return value = data.ConnId; });
+                                    autoEvent.Set(); //通知saveThread
+                                }
                             }
                         }
-                       // continue;
+                        else
+                        {
+                            //处理广西情况 
+                            if (data != null && data.RawData != null && data.RawData.Length > 0)
+                            {
+                                var dataNew = HandlerQueue(data); //解析数据
+                                if (dataNew != null)
+                                {
+                                    afterAnalysisQueue.Enqueue(dataNew);  //放入已解析队列
+                                                                          //  clientsConn.AddOrUpdate(dataNew.PhysicalAddressFormat, data.ConnId, (key, value) => { return value = data.ConnId; });
+                                    autoEvent.Set(); //通知saveThread
+                                }
+                            }
+                        }
                     }
-                    Thread.Sleep(100);
+                    Thread.Sleep(50);
                 }
                 catch (Exception ex)
                 {
@@ -148,88 +189,138 @@ namespace GXEBRebackSaveTool.Utils
         public void SaveStatus()
         {
             EquipmentDetail detail;
+            NSEquipmentDetail detail_NS;
             while (this.isRun)
             {
                 try
                 {
-                    if (!this.afterAnalysisQueue.IsEmpty)
+                    if (SingletonInfo.GetInstance().ProtocolCode == "2")
                     {
-                        this.afterAnalysisQueue.TryDequeue(out detail);
-                        if (detail != null && !IsHeartBeat(detail))
+                        #region 处理图南协议的
+                        if (!this.afterAnalysisQueue.IsEmpty)
                         {
-                            if (detail.FileName != null && detail.FileName.Length > 0 && Enum.IsDefined(typeof(RecordingCategory), detail.RecordingCategory))
+                            this.afterAnalysisQueue.TryDequeue(out detail);
+                            if (detail != null && !IsHeartBeat(detail))
                             {
-                                ThreadPool.QueueUserWorkItem(delegate
+                                if (detail.FileName != null && detail.FileName.Length > 0 && Enum.IsDefined(typeof(RecordingCategory), detail.RecordingCategory))
                                 {
-                                    if (this.db != null)
+                                    ThreadPool.QueueUserWorkItem(delegate
                                     {
-                                        this.db.InsertOrUpdateAudioRecorde(detail);
-                                    }
-                                });
-                            }
-                            else
-                            {
-                                string[] fmFreList = detail.FMFreListFormat.Split(new string[1]
-							{
-								","
-							}, StringSplitOptions.RemoveEmptyEntries);
-                                string[] fmSigStrength = detail.FMSignalStrengthFormat.Split(new string[1]
-							{
-								","
-							}, StringSplitOptions.RemoveEmptyEntries);
-                                lock (this.dtStatus.Rows.SyncRoot)
-                                {
-                                    DataRow[] rows2 = this.dtStatus.Select("srv_physical_code='" + detail.PhysicalAddressFormat + "'");
-                                    if (rows2 != null && rows2.Length > 0)
-                                    {
-                                        DataRow[] array = rows2;
-                                        foreach (DataRow item2 in array)
+                                        if (this.db != null)
                                         {
-                                            for (int j = this.dtStatus.Rows.Count - 1; j >= 0; j--)
-                                            {
-                                                if (this.dtStatus.Rows[j]["srv_physical_code"] == item2["srv_physical_code"])
-                                                {
-                                                    this.dtStatus.Rows[j].Delete();
-                                                }
-                                            }
-                                            this.dtStatus.AcceptChanges();
+                                            this.db.InsertOrUpdateAudioRecorde(detail);
                                         }
-                                    }
-                                    this.dtStatus.Rows.Add(0, detail.PhysicalAddressFormat, (detail.BroadcastStateFormat == "待机") ? "关机" : "开机", detail.Voltage220Format, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, (fmFreList.Length > 0) ? fmFreList[0] : "0", (fmSigStrength.Length > 0) ? fmSigStrength[0] : "0", (fmFreList.Length > 1) ? fmFreList[1] : "0", (fmSigStrength.Length > 1) ? fmSigStrength[1] : "0", DBNull.Value, DBNull.Value, detail.LogicalAddressFormat, detail.PhysicalAddressFormat, DBNull.Value, DBNull.Value, DBNull.Value, detail.SrvTime);
+                                    });
                                 }
-                                lock (this.dtStatusNew.Rows.SyncRoot)
+                                else
                                 {
-                                    DataRow[] rows = this.dtStatusNew.Select("srv_physical_code='" + detail.PhysicalAddressFormat + "'");
-                                    if (rows != null && rows.Length > 0)
+                                    string[] fmFreList = detail.FMFreListFormat.Split(new string[1]
+                                {
+                                ","
+                                }, StringSplitOptions.RemoveEmptyEntries);
+                                    string[] fmSigStrength = detail.FMSignalStrengthFormat.Split(new string[1]
+                                {
+                                ","
+                                }, StringSplitOptions.RemoveEmptyEntries);
+                                    lock (this.dtStatus.Rows.SyncRoot)
                                     {
-                                        DataRow[] array2 = rows;
-                                        foreach (DataRow item in array2)
+                                        DataRow[] rows2 = this.dtStatus.Select("srv_physical_code='" + detail.PhysicalAddressFormat + "'");
+                                        if (rows2 != null && rows2.Length > 0)
                                         {
-                                            for (int i = this.dtStatusNew.Rows.Count - 1; i >= 0; i--)
+                                            DataRow[] array = rows2;
+                                            foreach (DataRow item2 in array)
                                             {
-                                                if (this.dtStatusNew.Rows[i]["srv_physical_code"] == item["srv_physical_code"])
+                                                for (int j = this.dtStatus.Rows.Count - 1; j >= 0; j--)
                                                 {
-                                                    this.dtStatusNew.Rows[i].Delete();
+                                                    if (this.dtStatus.Rows[j]["srv_physical_code"] == item2["srv_physical_code"])
+                                                    {
+                                                        this.dtStatus.Rows[j].Delete();
+                                                    }
                                                 }
+                                                this.dtStatus.AcceptChanges();
                                             }
-                                            this.dtStatusNew.AcceptChanges();
                                         }
+                                        this.dtStatus.Rows.Add(0, detail.PhysicalAddressFormat, (detail.BroadcastStateFormat == "待机") ? "关机" : "开机", detail.Voltage220Format, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, (fmFreList.Length > 0) ? fmFreList[0] : "0", (fmSigStrength.Length > 0) ? fmSigStrength[0] : "0", (fmFreList.Length > 1) ? fmFreList[1] : "0", (fmSigStrength.Length > 1) ? fmSigStrength[1] : "0", DBNull.Value, DBNull.Value, detail.LogicalAddressFormat, detail.PhysicalAddressFormat, DBNull.Value, DBNull.Value, DBNull.Value, detail.SrvTime);
                                     }
-                                    this.dtStatusNew.Rows.Add(0, detail.PhysicalAddressFormat, detail.BroadcastStateFormat, detail.Voltage220Format, (fmFreList.Length > 0) ? fmFreList[0] : "0", (fmSigStrength.Length > 0) ? fmSigStrength[0] : "0", (fmFreList.Length > 1) ? fmFreList[1] : "0", (fmSigStrength.Length > 1) ? fmSigStrength[1] : "0", detail.LogicalAddressFormat, detail.PhysicalAddressFormat, detail.SrvTime, detail.PlayTypeFormat, detail.VersionsFormat, detail.DigitalTVRadioFrequencyModeFormat, detail.DigitalTVRadioFrequencyFreFormat, detail.BroadcastVolumeFormat, detail.CurrentModeSignalQualityFormat, detail.CurrentModeSignalStrengthFormat, detail.RemoteControlCenterIPAddressFormat, detail.RemoteControlCenterPortFormat, detail.AudioServerIPAddressFormat, detail.AudioServerPortFormat, detail.CallWayFormat, detail.FileNameFormat, detail.RecordingDurationFormat, detail.PacksTotalNumberFormat, detail.RebackFileTypeFormat, detail.PackStartIndexFormat, detail.LastPacksNuberFormat, detail.TerminalTypeFormat, detail.LongitudeFormat, detail.LatitudeFormat, detail.RebackModeFormat, detail.NetworkModeFormat, detail.Voltage24Format, detail.Voltage12Format, detail.AmplifierElectricCurrentFormat, detail.LocalHostFormat, detail.SubnetMaskFormat, detail.DefaultGatewayFormat, detail.FactoryName);
-                                    int count = this.dtStatusNew.Rows.Count;
-                                    this.SaveEqStatus();
+                                    lock (this.dtStatusNew.Rows.SyncRoot)
+                                    {
+                                        DataRow[] rows = this.dtStatusNew.Select("srv_physical_code='" + detail.PhysicalAddressFormat + "'");
+                                        if (rows != null && rows.Length > 0)
+                                        {
+                                            DataRow[] array2 = rows;
+                                            foreach (DataRow item in array2)
+                                            {
+                                                for (int i = this.dtStatusNew.Rows.Count - 1; i >= 0; i--)
+                                                {
+                                                    if (this.dtStatusNew.Rows[i]["srv_physical_code"] == item["srv_physical_code"])
+                                                    {
+                                                        this.dtStatusNew.Rows[i].Delete();
+                                                    }
+                                                }
+                                                this.dtStatusNew.AcceptChanges();
+                                            }
+                                        }
+                                        this.dtStatusNew.Rows.Add(0, detail.PhysicalAddressFormat, detail.BroadcastStateFormat, detail.Voltage220Format, (fmFreList.Length > 0) ? fmFreList[0] : "0", (fmSigStrength.Length > 0) ? fmSigStrength[0] : "0", (fmFreList.Length > 1) ? fmFreList[1] : "0", (fmSigStrength.Length > 1) ? fmSigStrength[1] : "0", detail.LogicalAddressFormat, detail.PhysicalAddressFormat, detail.SrvTime, detail.PlayTypeFormat, detail.VersionsFormat, detail.DigitalTVRadioFrequencyModeFormat, detail.DigitalTVRadioFrequencyFreFormat, detail.BroadcastVolumeFormat, detail.CurrentModeSignalQualityFormat, detail.CurrentModeSignalStrengthFormat, detail.RemoteControlCenterIPAddressFormat, detail.RemoteControlCenterPortFormat, detail.AudioServerIPAddressFormat, detail.AudioServerPortFormat, detail.CallWayFormat, detail.FileNameFormat, detail.RecordingDurationFormat, detail.PacksTotalNumberFormat, detail.RebackFileTypeFormat, detail.PackStartIndexFormat, detail.LastPacksNuberFormat, detail.TerminalTypeFormat, detail.LongitudeFormat, detail.LatitudeFormat, detail.RebackModeFormat, detail.NetworkModeFormat, detail.Voltage24Format, detail.Voltage12Format, detail.AmplifierElectricCurrentFormat, detail.LocalHostFormat, detail.SubnetMaskFormat, detail.DefaultGatewayFormat, detail.FactoryName);
+                                        int count = this.dtStatusNew.Rows.Count;
+                                        this.SaveEqStatus();
+                                    }
                                 }
                             }
                         }
+                        else
+                        {
+                            this.autoEvent.WaitOne();
+                        }
+                        #endregion
                     }
                     else
                     {
-                        this.autoEvent.WaitOne();
+                        //处理国标协议
+                        if (!this.afterAnalysisQueue_NS.IsEmpty)
+                        {
+                            this.afterAnalysisQueue_NS.TryDequeue(out detail_NS);
+                            if (detail_NS != null)
+                            {
+
+                                if (string.IsNullOrEmpty(detail_NS.ResourceCode))
+                                {
+                                    db.UpdateSrvEquipmentStatusBatch_Nation(detail_NS);
+                                }
+                                else
+                                {
+                                    lock (this.dtsrvStatus_national.Rows.SyncRoot)
+                                    {
+                                        DataRow[] rows2 = this.dtsrvStatus_national.Select("srv_physical_code='" + detail_NS.srv_physical_code + "'");
+                                        if (rows2 != null && rows2.Length > 0)
+                                        {
+                                            DataRow[] array = rows2;
+                                            foreach (DataRow item2 in array)
+                                            {
+                                                for (int j = this.dtsrvStatus_national.Rows.Count - 1; j >= 0; j--)
+                                                {
+                                                    if (this.dtsrvStatus_national.Rows[j]["srv_physical_code"] == item2["srv_physical_code"])
+                                                    {
+                                                        this.dtsrvStatus_national.Rows[j].Delete();
+                                                    }
+                                                }
+                                                this.dtsrvStatus_national.AcceptChanges();
+                                            }
+                                        }
+                                        this.dtsrvStatus_national.Rows.Add(detail_NS.ResourceCode, detail_NS.TerminalVolume, detail_NS.TerminalAddressInfo, detail_NS.RebackInfo, detail_NS.srv_physical_code, detail_NS.WorkStatus, detail_NS.FaultCode, detail_NS.DeviceTypeCode, detail_NS.HardwareVersionNum, detail_NS.SoftwareVersionNum, detail_NS.FMStatus, detail_NS.DVBCStatus, detail_NS.DTMBStatus, detail_NS.DVBC_FreqInfo, detail_NS.DTMB_FreqInfo, detail_NS.FM_FreqScanList, detail_NS.FM_CurrentFreqInfo, detail_NS.FM_KeepOrderInfo);
+                                        this.SaveEqStatus();
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            this.autoEvent.WaitOne();
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
-                    DataDealHelper.log.Error("数据缓存异常-" + this.afterAnalysisQueue.Count, ex);
+                    // DataDealHelper.log.Error("数据缓存异常-" + this.afterAnalysisQueue.Count, ex);
                 }
             }
         }
@@ -259,28 +350,51 @@ namespace GXEBRebackSaveTool.Utils
         {
             DataTable dt = null;
             DataTable dtNew = null;
-            lock (dtStatus.Rows.SyncRoot)
+            DataTable dtNa = null;
+
+            if (SingletonInfo.GetInstance().ProtocolCode == "1")
             {
-                if (dtStatus.Rows.Count > 0)
+                //国标情况
+                lock (dtsrvStatus_national.Rows.SyncRoot) //多线程环境下锁住DataTable中的Rows集合同时也锁住了Columns集合
                 {
-                    dt = dtStatus.Copy();
-                    dtStatus.Rows.Clear();
+                    if (dtsrvStatus_national.Rows.Count > 0)
+                    {
+                        dtNa = dtsrvStatus_national.Copy();
+                        dtsrvStatus_national.Rows.Clear();
+                    }
+                }
+
+                if (db != null && dtNa != null )
+                {
+                    db.BulkEquipmentDetailNation(dtNa);
                 }
             }
-            lock (dtStatusNew.Rows.SyncRoot) //多线程环境下锁住DataTable中的Rows集合同时也锁住了Columns集合
+            else
             {
-                if (dtStatusNew.Rows.Count > 0)
+                //图南情况
+                lock (dtStatus.Rows.SyncRoot)
                 {
-                    dtNew = dtStatusNew.Copy();
-                    dtStatusNew.Rows.Clear();
-                }    
-            }
-            if (db != null && dt != null && dtNew != null)
-            {
-                var status = db.UpdateSrvEquipmentStatusBatch(dt);
-                db.BulkEquipmentDetail(dt);
-                db.BulkNewEquipmentDetail(dtNew);
-                log.Info("数据库存储结束-" + status);
+                    if (dtStatus.Rows.Count > 0)
+                    {
+                        dt = dtStatus.Copy();
+                        dtStatus.Rows.Clear();
+                    }
+                }
+                lock (dtStatusNew.Rows.SyncRoot) //多线程环境下锁住DataTable中的Rows集合同时也锁住了Columns集合
+                {
+                    if (dtStatusNew.Rows.Count > 0)
+                    {
+                        dtNew = dtStatusNew.Copy();
+                        dtStatusNew.Rows.Clear();
+                    }
+                }
+                if (db != null && dt != null && dtNew != null)
+                {
+                    var status = db.UpdateSrvEquipmentStatusBatch(dt);
+                    db.BulkEquipmentDetail(dt);
+                    db.BulkNewEquipmentDetail(dtNew);
+                  //  log.Info("数据库存储结束-" + status);
+                }
             }
         }
 
@@ -295,6 +409,46 @@ namespace GXEBRebackSaveTool.Utils
             }
         }
 
+
+        private NSEquipmentDetail HandlerQueue_NationalStandard(EquipmentSource datare)
+        {
+            byte[] data = datare.RawData;
+            if (data.Length < 15) return null;
+
+            NSEquipmentDetail equipmentDetail = new NSEquipmentDetail();
+            try
+            {
+                log.Info("开始解析数据-" + data.Length);
+              
+                string outMsg; //返回的错误信息，正确解析则返回空
+                var detail = EquipmentHelper.HandleData_NS(data, out outMsg);
+
+                if (detail != null && string.IsNullOrWhiteSpace(outMsg))
+                {
+                    #region 解析EquipmentDetail
+                    foreach (var key in detail.Keys)
+                    {
+                        var proInfo = typeof(NSEquipmentDetail).GetProperty(key.ToString());
+                        if (null != proInfo)
+                        {
+                            var eqValue = EquipmentHelper.GetNSEquipmentValue(key, detail[key], equipmentDetail);
+                            proInfo.SetValue(equipmentDetail, eqValue, null);
+                        }
+                    }
+                    #endregion
+                }
+                else
+                {
+                    equipmentDetail = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Error("设备详细信息解析异常", ex);
+                equipmentDetail = null;
+            }
+            return equipmentDetail;
+        }
 
         /// <summary>
         /// 解析终端设备工作状态
