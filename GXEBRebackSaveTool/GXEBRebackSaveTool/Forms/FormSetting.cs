@@ -1,4 +1,5 @@
-﻿using GXEBRebackSaveTool.Utils;
+﻿using GXEBRebackSaveTool.Models;
+using GXEBRebackSaveTool.Utils;
 using System;
 using System.IO;
 using System.Net;
@@ -45,6 +46,11 @@ namespace GXEBRebackSaveTool.Forms
                 }
             }
             this.cbBoxIP.Text = this.ini.ReadValue("LocalHost", "LoaclIP");
+
+            ComboBoxHelper.InitProtocolType(this.cmb_protocoltype);
+            cmb_protocoltype.SelectedValue= this.ini.ReadValue("ProtocolType", "type");
+
+           
         }
 
         private void btnSet_Click(object sender, EventArgs e)
@@ -93,6 +99,10 @@ namespace GXEBRebackSaveTool.Forms
                 this.ini.WriteValue("MQ", "MQIP", this.txtMQServer.Text.Trim());
                 this.ini.WriteValue("MQ", "MQPORT", this.textMQPort.Text.Trim());
                 this.ini.WriteValue("MQ", "TopicName", this.txtTopiName.Text.Trim());
+                this.ini.WriteValue("ProtocolType", "type", this.cmb_protocoltype.SelectedValue.ToString());
+
+                SingletonInfo.GetInstance().ProtocolCode = cmb_protocoltype.SelectedValue.ToString();
+
                 base.DialogResult = DialogResult.OK;
             }
         }

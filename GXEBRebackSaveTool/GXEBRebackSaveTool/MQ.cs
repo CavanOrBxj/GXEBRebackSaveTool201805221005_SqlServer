@@ -87,6 +87,7 @@ namespace GXEBRebackSaveTool
             {
                 if (session != null)
                 {
+                   
                     session.Close();
                 }
                 if (connection != null)
@@ -97,7 +98,6 @@ namespace GXEBRebackSaveTool
             }
             catch (Exception)
             {
-                
                 throw;
             }
           

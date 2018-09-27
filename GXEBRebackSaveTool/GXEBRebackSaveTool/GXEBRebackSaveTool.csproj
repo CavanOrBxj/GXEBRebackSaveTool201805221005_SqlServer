@@ -105,6 +105,7 @@
     <Compile Include="Enums\AudioRebackProtocol.cs" />
     <Compile Include="Enums\CallWayEnum.cs" />
     <Compile Include="Enums\Equipment.cs" />
+    <Compile Include="Enums\EquipmentNS.cs" />
     <Compile Include="Enums\FactoryName.cs" />
     <Compile Include="Enums\FeaturesCode.cs" />
     <Compile Include="Enums\FrameHeaderEnum.cs" />
@@ -125,9 +126,12 @@
       <DependentUpon>FormSetting.cs</DependentUpon>
     </Compile>
     <Compile Include="HexHelper.cs" />
+    <Compile Include="Models\ComboBoxHelper.cs" />
+    <Compile Include="Models\ConvertHelper.cs" />
     <Compile Include="Models\EquipmentDetail.cs" />
     <Compile Include="Models\MonitorPlatformMessage.cs" />
     <Compile Include="Models\EquipmentSource.cs" />
+    <Compile Include="Models\NSEquipmentDetail.cs" />
     <Compile Include="Models\RebackConfig.cs" />
     <Compile Include="Models\RebackStatus.cs" />
     <Compile Include="Models\SendbackDetail.cs" />
@@ -143,6 +147,7 @@
     </Compile>
     <Compile Include="UdpSender.cs" />
     <Compile Include="Utils\CalmCRC.cs" />
+    <Compile Include="Utils\CRC32.cs" />
     <Compile Include="Utils\DataDealHelper.cs" />
     <Compile Include="Utils\EnumerableHelper.cs" />
     <Compile Include="Utils\EnumHelper.cs" />

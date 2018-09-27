@@ -29,35 +29,5 @@ namespace GXEBRebackSaveTool.Enums
         /// </summary>
         [Description("上级广播")]
         SuperBroadcast = 5,
-
-        /// <summary>
-        /// 上级广播
-        /// </summary>
-        [Description("预留1")]
-        obligate1 = 6,
-
-        /// <summary>
-        /// 上级广播
-        /// </summary>
-        [Description("预留2")]
-        obligate2 = 7,
-
-        /// <summary>
-        /// 上级广播
-        /// </summary>
-        [Description("预留3")]
-        obligate3 = 8,
-
-        /// <summary>
-        /// 上级广播
-        /// </summary>
-        [Description("预留4")]
-        obligate4 = 9,
-
-        /// <summary>
-        /// 上级广播
-        /// </summary>
-        [Description("预留5")]
-        obligate5 = 10,
     }
 }

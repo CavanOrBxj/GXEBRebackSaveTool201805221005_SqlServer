@@ -28,6 +28,11 @@ namespace GXEBRebackSaveTool
         public string FTPPwd;
         public string ftppath;
 
+        /// <summary>
+        /// 协议类型码    1表示国标 2表示图南
+        /// </summary>
+        public string ProtocolCode;
+
         private SingletonInfo()                                                                 
         {
             factorycode = ""; //
@@ -42,6 +47,8 @@ namespace GXEBRebackSaveTool
             FTPUserName = "";
             FTPPwd = "";
             ftppath = "";
+
+            ProtocolCode = "";
         }
 
    

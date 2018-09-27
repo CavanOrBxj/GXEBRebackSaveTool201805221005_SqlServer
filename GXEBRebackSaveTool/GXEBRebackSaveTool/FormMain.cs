@@ -111,12 +111,15 @@ namespace GXEBRebackSaveTool
             DataBase = new DBHelper();
             dataHelper = new DataDealHelper(DataBase);
 
-            //初始化处理线程
-            dealThread = new Thread(dataHelper.DealStatus);
-            saveThread = new Thread(dataHelper.SaveStatus);
+                textTcpPort.Text = ini.ReadValue("LocalHost", "TCPLocalPort");
+                textUdpPort.Text = ini.ReadValue("LocalHost", "UDPLocalPort");
 
-            textTcpPort.Text = ini.ReadValue("LocalHost", "TCPLocalPort");
-            textUdpPort.Text = ini.ReadValue("LocalHost", "UDPLocalPort");
+                SingletonInfo.GetInstance().ProtocolCode = ini.ReadValue("ProtocolType", "type");
+
+
+                //初始化处理线程
+                dealThread = new Thread(dataHelper.DealStatus);
+                saveThread = new Thread(dataHelper.SaveStatus);
 
             //初始化存储数据库的计时器（5秒更新一次数据库）
             dbTimer = new System.Timers.Timer(10000);
@@ -339,7 +342,7 @@ namespace GXEBRebackSaveTool
                     Invoke(new MethodInvoker(() =>
                     {
                         richTextRebackMsg.AppendText("接收时间:" + DateTime.Now + "\n");
-                        richTextRebackMsg.AppendText("数据:" + e.Data.ToNumberArrayString(" ", 16) + "\n");
+                        richTextRebackMsg.AppendText("UDP数据:" + e.Data.ToNumberArrayString(" ", 16) + "\n");
                     }));
                     if (saveDataToLog)
                     {
@@ -363,7 +366,7 @@ namespace GXEBRebackSaveTool
                     Invoke(new MethodInvoker(() =>
                     {
                         richTextRebackMsg.AppendText("接收时间:" + DateTime.Now + "\n");
-                        richTextRebackMsg.AppendText("数据:" + e.Data.ToNumberArrayString(" ", 16) + "\n");
+                        richTextRebackMsg.AppendText("TCP数据:" + e.Data.ToNumberArrayString(" ", 16) + "\n");
                     }));
                     if (saveDataToLog)
                     {
