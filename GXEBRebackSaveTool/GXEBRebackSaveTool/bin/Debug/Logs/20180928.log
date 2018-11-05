@@ -1,3 +1,0 @@
-2018-09-28 09:41:06,580 [1] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - TCP服务器关闭
-2018-09-28 09:41:06,774 [1] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - UDP服务器关闭
-2018-09-28 09:41:06,777 [1] INFO  GXEBRebackSaveTool.FormMain [(null)] - 回传服务启动：启动时间->2018-09-28 09:41:06

@@ -529,6 +529,7 @@ namespace GXEBRebackSaveTool.Utils
                     //{
                     //    equipmentDetail.FactoryName = dataHeader[FrameHeaderEnum.FactoryNumber];
                     //}
+                    equipmentDetail.FactoryName = "";
                 }
                 else
                 {
