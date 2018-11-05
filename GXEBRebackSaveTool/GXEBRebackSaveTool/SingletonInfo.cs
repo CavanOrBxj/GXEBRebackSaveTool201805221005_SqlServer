@@ -29,7 +29,7 @@ namespace GXEBRebackSaveTool
         public string ftppath;
 
         /// <summary>
-        /// 协议类型码    1表示国标 2表示图南
+        /// 协议类型码    1表示国标 2表示图南   目前国标只有达州在用   图南协议是广西版本的国标，即老国标
         /// </summary>
         public string ProtocolCode;
 

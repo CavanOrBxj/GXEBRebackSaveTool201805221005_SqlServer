@@ -497,6 +497,12 @@ namespace GXEBRebackSaveTool.Utils
                     clientsConn.AddOrUpdate(pp, datare.ConnId, (key, value) => { return value = datare.ConnId; });
 
                     clientsHeadData.AddOrUpdate(pp, equipmentDetail.HeaderData, (key, value) => { return value = equipmentDetail.HeaderData; });
+
+                    #region 特殊处理 20181105  厂家优先判定，便于后面数据特殊处理
+                    var factoryName = (FactoryName)ConvertHelper.Byte2int(equipmentDetail.HeaderData.Skip(10).Take(2).ToArray());
+                    equipmentDetail.FactoryName = EnumHelper.GetEnumDescription(factoryName);
+                    #endregion
+
                     #region 解析EquipmentDetail
                     foreach (var key in detail.Keys)
                     {
@@ -519,10 +525,10 @@ namespace GXEBRebackSaveTool.Utils
                     #endregion
 
                     var dataHeader = EquipmentHelper.HandleHeader(EquipmentHelper.GetFrameHeader(data));
-                    if (dataHeader != null)
-                    {
-                        equipmentDetail.FactoryName = dataHeader[FrameHeaderEnum.FactoryNumber];
-                    }
+                    //if (dataHeader != null)
+                    //{
+                    //    equipmentDetail.FactoryName = dataHeader[FrameHeaderEnum.FactoryNumber];
+                    //}
                 }
                 else
                 {

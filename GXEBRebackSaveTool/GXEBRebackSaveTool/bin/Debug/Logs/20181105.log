@@ -1,0 +1,50 @@
+2018-11-05 10:14:47,135 [1] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - TCP服务器关闭
+2018-11-05 10:14:47,305 [1] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - UDP服务器关闭
+2018-11-05 10:14:47,307 [1] INFO  GXEBRebackSaveTool.FormMain [(null)] - 回传服务启动：启动时间->2018-11-05 10:14:47
+2018-11-05 10:16:04,093 [1] INFO  GXEBRebackSaveTool.FormMain [(null)] - 回传服务启动：启动时间->2018-11-05 10:16:04
+2018-11-05 10:16:44,778 [1] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - TCP服务器关闭
+2018-11-05 10:16:44,935 [1] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - UDP服务器关闭
+2018-11-05 10:18:49,991 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-214
+2018-11-05 10:19:44,820 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-214
+2018-11-05 10:32:24,645 [1] INFO  GXEBRebackSaveTool.FormMain [(null)] - 回传服务启动：启动时间->2018-11-05 10:32:24
+2018-11-05 10:32:32,832 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-214
+2018-11-05 10:32:53,468 [1] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - TCP服务器关闭
+2018-11-05 10:32:53,732 [1] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - UDP服务器关闭
+2018-11-05 10:32:59,482 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-214
+2018-11-05 10:39:13,142 [1] INFO  GXEBRebackSaveTool.FormMain [(null)] - 回传服务启动：启动时间->2018-11-05 10:39:13
+2018-11-05 10:39:14,999 [1] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - TCP服务器关闭
+2018-11-05 10:39:15,160 [1] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - UDP服务器关闭
+2018-11-05 10:39:23,614 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-214
+2018-11-05 10:39:24,429 [9] INFO  GXEBRebackSaveTool.FormMain [(null)] - 握手应答指令已发送
+2018-11-05 10:47:53,427 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-202
+2018-11-05 10:47:54,687 [8] INFO  GXEBRebackSaveTool.FormMain [(null)] - 握手应答指令已发送
+2018-11-05 11:22:56,338 [1] INFO  GXEBRebackSaveTool.FormMain [(null)] - 回传服务启动：启动时间->2018-11-05 11:22:56
+2018-11-05 11:38:45,826 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-202
+2018-11-05 11:42:09,163 [1] INFO  GXEBRebackSaveTool.FormMain [(null)] - 回传服务启动：启动时间->2018-11-05 11:42:09
+2018-11-05 11:42:22,631 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-214
+2018-11-05 11:49:36,821 [1] INFO  GXEBRebackSaveTool.FormMain [(null)] - 回传服务启动：启动时间->2018-11-05 11:49:36
+2018-11-05 11:49:46,873 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-214
+2018-11-05 11:55:57,301 [1] INFO  GXEBRebackSaveTool.FormMain [(null)] - 回传服务启动：启动时间->2018-11-05 11:55:57
+2018-11-05 11:56:03,719 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-214
+2018-11-05 13:55:35,708 [1] INFO  GXEBRebackSaveTool.FormMain [(null)] - 回传服务启动：启动时间->2018-11-05 13:55:35
+2018-11-05 13:57:09,328 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-214
+2018-11-05 13:57:35,150 [8] INFO  GXEBRebackSaveTool.FormMain [(null)] - 握手应答指令已发送
+2018-11-05 13:58:45,865 [1] INFO  GXEBRebackSaveTool.FormMain [(null)] - 回传服务启动：启动时间->2018-11-05 13:58:45
+2018-11-05 13:59:04,498 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-214
+2018-11-05 14:02:27,079 [1] INFO  GXEBRebackSaveTool.FormMain [(null)] - 回传服务启动：启动时间->2018-11-05 14:02:27
+2018-11-05 14:02:34,657 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-214
+2018-11-05 14:13:49,797 [1] INFO  GXEBRebackSaveTool.FormMain [(null)] - 回传服务启动：启动时间->2018-11-05 14:13:49
+2018-11-05 14:13:53,961 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-214
+2018-11-05 14:20:32,087 [1] INFO  GXEBRebackSaveTool.FormMain [(null)] - 回传服务启动：启动时间->2018-11-05 14:20:32
+2018-11-05 14:20:35,792 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-214
+2018-11-05 14:23:09,241 [1] INFO  GXEBRebackSaveTool.FormMain [(null)] - 回传服务启动：启动时间->2018-11-05 14:23:09
+2018-11-05 14:23:13,851 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-214
+2018-11-05 14:26:15,597 [1] INFO  GXEBRebackSaveTool.FormMain [(null)] - 回传服务启动：启动时间->2018-11-05 14:26:15
+2018-11-05 14:26:23,287 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-214
+2018-11-05 14:26:23,358 [8] INFO  GXEBRebackSaveTool.FormMain [(null)] - 握手应答指令已发送
+2018-11-05 14:26:48,187 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-202
+2018-11-05 14:26:48,187 [8] INFO  GXEBRebackSaveTool.FormMain [(null)] - 握手应答指令已发送
+2018-11-05 14:28:15,212 [1] INFO  GXEBRebackSaveTool.FormMain [(null)] - 回传服务启动：启动时间->2018-11-05 14:28:15
+2018-11-05 14:33:52,513 [1] INFO  GXEBRebackSaveTool.FormMain [(null)] - 回传服务启动：启动时间->2018-11-05 14:33:52
+2018-11-05 14:33:58,686 [4] INFO  GXEBRebackSaveTool.Utils.DataDealHelper [(null)] - 开始解析数据-202
+2018-11-05 14:33:58,753 [8] INFO  GXEBRebackSaveTool.FormMain [(null)] - 握手应答指令已发送

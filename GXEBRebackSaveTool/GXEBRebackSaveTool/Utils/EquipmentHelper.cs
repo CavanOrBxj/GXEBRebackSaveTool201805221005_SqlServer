@@ -2,7 +2,9 @@
 using GXEBRebackSaveTool.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -123,7 +125,7 @@ namespace GXEBRebackSaveTool.Utils
 
             Dictionary<FrameHeaderEnum, string> data = new Dictionary<FrameHeaderEnum, string>();
             data.Add(FrameHeaderEnum.EBResourceCoding, dataHeader.Take(10).Skip(1).ToArrayString(""));
-            var factoryName = (FactoryName)BitConverter.ToUInt16(dataHeader.Skip(10).Take(2).ToArray(), 0);
+            var factoryName = (FactoryName)ConvertHelper.Byte2int(dataHeader.Skip(10).Take(2).ToArray());
             data.Add(FrameHeaderEnum.FactoryNumber, EnumHelper.GetEnumDescription(factoryName));
             data.Add(FrameHeaderEnum.HardwareVersion, dataHeader.Skip(12).Take(2).ToArrayString("."));
             data.Add(FrameHeaderEnum.SoftwareVersion, dataHeader.Skip(14).Take(2).ToArrayString("."));
@@ -434,10 +436,20 @@ namespace GXEBRebackSaveTool.Utils
                     case Equipment.CurrentModeSignalStrength://byte
                         return eqData[0];
                     case Equipment.RemoteControlCenterIPAddress://IP
+
+                        if (ob.FactoryName!="杭州图南")
+                        {
+                            Array.Reverse(eqData);
+                        }
+
                         return eqData;
                     case Equipment.RemoteControlCenterPort://Uint16
                         return BitConverter.ToUInt16(eqData, 0);
                     case Equipment.AudioServerIPAddress://IP
+                        if (ob.FactoryName != "杭州图南")
+                        {
+                            Array.Reverse(eqData);
+                        }
                         return eqData;
                     case Equipment.AudioServerPort://Uint16
                         return BitConverter.ToUInt16(eqData, 0);
@@ -489,6 +501,10 @@ namespace GXEBRebackSaveTool.Utils
                     case Equipment.LocalHost://IP
                     case Equipment.SubnetMask://IP
                     case Equipment.DefaultGateway://IP
+                        if (ob.FactoryName != "杭州图南")
+                        {
+                            Array.Reverse(eqData);
+                        }
                         return eqData;
 
                     case Equipment.AudioReback://byte[]
