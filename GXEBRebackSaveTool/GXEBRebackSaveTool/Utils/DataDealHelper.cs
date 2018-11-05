@@ -666,7 +666,7 @@ namespace GXEBRebackSaveTool.Utils
                                 break;
                         }
                     }
-                    if (tmp.AUDIOREBACKSERVERIP != null && tmp.AUDIOREBACKPORT != null)
+                    if (tmp.AUDIOREBACKSERVERIP != null)
                     {
                         string name = Dns.GetHostName();
                         IPAddress[] ipadrlist = Dns.GetHostAddresses(name);
