@@ -229,8 +229,6 @@ namespace GXEBRebackSaveTool
             }
             catch (Exception)
             {
-
-                
             }
         }
 
