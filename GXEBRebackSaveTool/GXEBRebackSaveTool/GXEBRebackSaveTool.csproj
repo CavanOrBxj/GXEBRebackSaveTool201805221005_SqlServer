@@ -149,6 +149,7 @@
     <Compile Include="Utils\CalmCRC.cs" />
     <Compile Include="Utils\CRC32.cs" />
     <Compile Include="Utils\DataDealHelper.cs" />
+    <Compile Include="Utils\DataDetail.cs" />
     <Compile Include="Utils\EnumerableHelper.cs" />
     <Compile Include="Utils\EnumHelper.cs" />
     <Compile Include="Utils\EquipmentHelper.cs" />

@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Threading;
 
 namespace GXEBRebackSaveTool.Utils
@@ -26,6 +27,9 @@ namespace GXEBRebackSaveTool.Utils
         private ConcurrentDictionary<string, IntPtr> clientsConn;
         private ConcurrentDictionary<string, byte[]> clientsHeadData;
         private ConcurrentQueue<EquipmentSource> beforeAnalysisQueue;
+        private ConcurrentQueue<byte[]> beforeAnalysisQueue_record;//录音文件上传接收队列  20181108新增
+
+
         private ConcurrentQueue<EquipmentDetail> afterAnalysisQueue;
 
         private ConcurrentQueue<NSEquipmentDetail> afterAnalysisQueue_NS;
@@ -59,6 +63,9 @@ namespace GXEBRebackSaveTool.Utils
                 clientsConn = new ConcurrentDictionary<string, IntPtr>();
                 clientsHeadData = new ConcurrentDictionary<string, byte[]>();
                 beforeAnalysisQueue = new ConcurrentQueue<EquipmentSource>();
+
+                beforeAnalysisQueue_record = new ConcurrentQueue<byte[]>();
+
                 afterAnalysisQueue = new ConcurrentQueue<EquipmentDetail>();
                 afterAnalysisQueue_NS = new ConcurrentQueue<NSEquipmentDetail>();
                 this.db = db;
@@ -169,6 +176,50 @@ namespace GXEBRebackSaveTool.Utils
                                     afterAnalysisQueue.Enqueue(dataNew);  //放入已解析队列
                                                                           //  clientsConn.AddOrUpdate(dataNew.PhysicalAddressFormat, data.ConnId, (key, value) => { return value = data.ConnId; });
                                     autoEvent.Set(); //通知saveThread
+                                }
+                            }
+                        }
+                    }
+
+                    if (!beforeAnalysisQueue_record.IsEmpty)
+                    {
+                        byte[] dataByte;
+                        beforeAnalysisQueue_record.TryDequeue(out dataByte); //拿出数据
+                        if (dataByte != null && dataByte.Length > 0)
+                        {
+                            //解析数据
+                            List<DataDetail> dataNew = HandlerQueue_Record(dataByte); //解析数据
+                            if (dataNew != null)
+                            {
+
+                                string filename = dataNew[0].FileName;
+
+                                string filepath = Directory.GetCurrentDirectory();
+                                if (Directory.EnumerateFiles(filepath, filename + ".*", SearchOption.AllDirectories).Any())
+                                {
+                                    break;
+                                }
+                                if (SingletonInfo.GetInstance().FileDic.ContainsKey(filename))
+                                {
+                                    FileAll file = SingletonInfo.GetInstance().FileDic[filename];
+                                    //  file.ReceiveTime = file.ReceiveTime.AddSeconds(2);
+                                    file.ReceiveTime = DateTime.Now.AddSeconds(10);
+                                    foreach (DataDetail item in dataNew)
+                                    {
+                                        file.DataList.Add(item);
+                                    }
+                                }
+                                else
+                                {
+                                    FileAll file = new FileAll();
+                                    // file.ReceiveTime = DateTime.Now.AddSeconds(2);
+                                    file.ReceiveTime = DateTime.Now;
+                                    file.DataList = new List<DataDetail>();
+                                    foreach (DataDetail item in dataNew)
+                                    {
+                                        file.DataList.Add(item);
+                                    }
+                                    SingletonInfo.GetInstance().FileDic.Add(filename, file);
                                 }
                             }
                         }
@@ -409,6 +460,14 @@ namespace GXEBRebackSaveTool.Utils
             }
         }
 
+        public void EnqueueRecord(byte[] data)
+        {
+            if (data != null && data.Length > 0)
+            {
+                beforeAnalysisQueue_record.Enqueue(data);
+            }
+        }
+
 
         private NSEquipmentDetail HandlerQueue_NationalStandard(EquipmentSource datare)
         {
@@ -545,6 +604,232 @@ namespace GXEBRebackSaveTool.Utils
         }
 
 
+        /// <summary>
+        /// 解析终端设备工作状态
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns>设备状态</returns>
+        private List<DataDetail> HandlerQueue_Record(byte[] datare)
+        {
+            byte[] data = datare;
+            if (data.Length < 13) return null;
+
+            List<DataDetail> DDlist = new List<DataDetail>();
+            try
+            {
+                string pp = "";
+                for (int i = 0; i < data.Length; i++)
+                {
+                    pp += " " + data[i].ToString("X2");
+                }
+
+
+                string pp1 = "";
+                for (int i = 0; i < data.Length; i++)
+                {
+                    pp1 += data[i].ToString("X2");
+                }
+
+
+
+                var msgType = Convert.ToChar(data[0]);
+                if (msgType == '&')
+                {
+                    //帧头占12字节
+                }
+                else if (msgType == '%')
+                {
+                    List<byte[]> bodyList = GetBodtList(data);
+
+
+                    foreach (byte[] singledataBody in bodyList)
+                    {
+                        //帧头占18字节
+                        byte[] dataBody = singledataBody;
+
+
+                        //判断CRC是否对应
+                        var array1 = CalmCRC.GetCRC16(dataBody.Take(dataBody.Length - 2).ToArray(), true);
+                        var array2 = dataBody.Skip(dataBody.Length - 2).ToArray();
+                        if (EqualsArray(array1, array2))
+                        {
+                            string allengthstr = Convert.ToString((int)dataBody[2], 16).PadLeft(2, '0') + Convert.ToString((int)dataBody[1], 16).PadLeft(2, '0');
+                            int AlldataLength = Convert.ToInt32(allengthstr, 16);
+                            int l = Convert.ToInt32(Convert.ToString((int)dataBody[5], 16).PadLeft(2, '0'), 16);//第一个数据段数据部分的长度
+
+                            List<byte> Section1List = new List<byte>();
+                            for (int i = 0; i < l; i++)
+                            {
+                                Section1List.Add(dataBody[6 + i]);
+                            }
+
+                            DataDetail data1 = Deal(Section1List);
+                            DDlist.Add(data1);
+
+                            while (AlldataLength > l + 3)
+                            {
+                                int SectionNdataLength = Convert.ToInt32(Convert.ToString((int)dataBody[l + 6 + 2], 16).PadLeft(2, '0'), 16);
+                                List<byte> SectionList = new List<byte>();
+                                for (int i = 0; i < SectionNdataLength; i++)
+                                {
+                                    SectionList.Add(dataBody[l + 6 + 3 + i]);
+                                }
+
+                                DataDetail datatmp = Deal(SectionList);
+                                DDlist.Add(datatmp);
+                                l = l + 3 + Convert.ToInt32(Convert.ToString((int)dataBody[l + 6 + 2], 16).PadLeft(2, '0'), 16);
+                            }
+                        }
+                    }
+
+                }
+                return DDlist;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
+
+        public DataDetail Deal(List<byte> dtlist)
+        {
+            byte[] bdata = dtlist.ToArray();
+            DataDetail datadetail = new DataDetail();
+            datadetail.PhysicalAddressLength = Convert.ToInt32(Convert.ToString((int)bdata[0], 16).PadLeft(2, '0'), 16);
+
+
+            List<byte> PhysicalAddressList = new List<byte>();
+            for (int i = 0; i < datadetail.PhysicalAddressLength; i++)//物理码地址 5
+            {
+                PhysicalAddressList.Add(bdata[1 + i]);
+            }
+            byte[] PhysicalAddressArray = PhysicalAddressList.ToArray();
+            string phyaddr = "";
+            for (int i = 0; i < PhysicalAddressArray.Length; i++)
+            {
+                phyaddr += PhysicalAddressArray[i].ToString("x2");
+            }
+            datadetail.PhysicalAddress = phyaddr;
+
+
+
+            List<byte> FileNameList = new List<byte>();
+            for (int i = 0; i < 33; i++)
+            {
+                FileNameList.Add(bdata[1 + datadetail.PhysicalAddressLength + i]);
+            }
+            byte[] FileNameArray = FileNameList.ToArray();
+            datadetail.FileName = System.Text.Encoding.ASCII.GetString(FileNameArray);
+
+
+
+            List<byte> PackNumList = new List<byte>();
+            for (int i = 0; i < 4; i++)
+            {
+                PackNumList.Add(bdata[33 + 1 + datadetail.PhysicalAddressLength + i]);
+            }
+            PackNumList.Reverse();
+            byte[] PackNumArray = PackNumList.ToArray();
+
+
+
+            // datadetail.PackageNum = ToHexString(PackNumArray);
+            datadetail.PackageNum = ConvertHelper.GetDataLenth(PackNumArray).ToString();
+            log.Error("收到包序号：" + datadetail.PackageNum);
+            datadetail.DataLength = Convert.ToInt32(bdata[1 + datadetail.PhysicalAddressLength + 33 + 5].ToString("x2") + bdata[1 + datadetail.PhysicalAddressLength + 33 + 4].ToString("x2"), 16);
+
+            List<byte> AudioDataList = new List<byte>();
+            for (int i = 0; i < datadetail.DataLength; i++)
+            {
+                AudioDataList.Add(bdata[33 + 1 + datadetail.PhysicalAddressLength + 5 + 1 + i]);
+            }
+            byte[] AudioDataArray = AudioDataList.ToArray();
+            datadetail.AudioData = AudioDataArray;
+            return datadetail;
+
+        }
+
+        public string ToHexString(byte[] bytes) // 0xae00cf => "AE00CF "
+        {
+            string hexString = string.Empty;
+
+            if (bytes != null)
+            {
+
+                StringBuilder strB = new StringBuilder();
+
+                for (int i = 0; i < bytes.Length; i++)
+                {
+
+                    strB.Append(bytes[i].ToString("X2"));
+
+                }
+
+                hexString = strB.ToString();
+
+            }
+            return hexString;
+
+        }
+
+        public static bool EqualsArray(Array a, Array b)
+        {
+            if (a == null && b == null)
+            {
+                return true;
+            }
+            else if (a == null)
+            {
+                return false;
+            }
+            else if (b == null)
+            {
+                return false;
+            }
+            if (a.Length != b.Length)
+            {
+                return false;
+            }
+            for (int i = 0; i < a.Length; i++)
+            {
+                if (!a.GetValue(i).Equals(b.GetValue(i)))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private List<byte[]> GetBodtList(byte[] data)
+        {
+            List<byte[]> bodyList = new List<byte[]>();
+            if (data.Length == 0) return null;
+
+
+            int l = data.Length;
+
+            while (l > 0)
+            {
+                byte[] nimei = data.Skip(data.Length - l).ToArray();
+                byte[] datatmp = nimei.Skip(18).ToArray();
+                if (datatmp.Length > 9)//一个完整帧长度
+                {
+                    int singledataLength = Convert.ToInt32(datatmp[2].ToString("x2") + datatmp[1].ToString("x2"), 16);
+                    List<byte> singledata = new List<byte>();
+
+                    for (int i = 0; i < singledataLength + 5; i++)
+                    {
+                        singledata.Add(datatmp[i]);
+                    }
+
+                    bodyList.Add(singledata.ToArray());
+                    l = l - singledata.Count - 18;
+                }
+            }
+            return bodyList;
+
+        }
 
         /// <summary>
         /// 保存录音文件
@@ -671,24 +956,47 @@ namespace GXEBRebackSaveTool.Utils
                             case "AUDIOREBACKPORT":
                                 tmp.AUDIOREBACKPORT = Convert.ToInt32(item.Split('~')[1]);
                                 break;
+                            case "PACKS_TOTALNUMBER":
+                              
+                                SingletonInfo.GetInstance().packnum = Convert.ToInt32(item.Split('~')[1]);
+                                break;
+                            default:
+                                break;
                         }
                     }
-                    if (tmp.AUDIOREBACKSERVERIP != null)
+
+                    if (SingletonInfo.GetInstance().udpport != tmp.AUDIOREBACKPORT.ToString())
                     {
-                        string name = Dns.GetHostName();
-                        IPAddress[] ipadrlist = Dns.GetHostAddresses(name);
-                        foreach (var item in ipadrlist)
+                        //图南设备  状态回传  和音频回传不同一个端口
+                        if (!Chenckudpport(tmp.AUDIOREBACKPORT.ToString()))
                         {
-                            if (item.ToString() == tmp.AUDIOREBACKSERVERIP)
-                            {
-                                //OpenReceiveTool(tmp.AUDIOREBACKSERVERIP, Convert.ToInt32(tmp.AUDIOREBACKPORT),SingletonInfo.GetInstance().FTPServer,SingletonInfo.GetInstance().FTPPort,SingletonInfo.GetInstance().FTPUserName,SingletonInfo.GetInstance().FTPPwd,SingletonInfo.GetInstance().ftppath);
-                             
-                                OpenReceiveTool(tmp.AUDIOREBACKSERVERIP, Convert.ToInt32(tmp.AUDIOREBACKPORT), SingletonInfo.GetInstance().FTPServer, SingletonInfo.GetInstance().FTPPort, SingletonInfo.GetInstance().FTPUserName, SingletonInfo.GetInstance().FTPPwd, "\\");
-                            }
+                            //需要创建新的接收数据线程
+                            tmp.Audio_reback_mode = 1;//1 UDP;2 TCP;3串口;其它值预留  现暂时默认设置为udp  20180129
+                            SendbackDetail sendbackDetail = new SendbackDetail();
+                            sendbackDetail.tag = Equipment.FileName;
+                            sendbackDetail.Extras = tmp;
+                            DataDealHelper.MyEvent(sendbackDetail);
                         }
+                    }
+                    else
+                    {
+                        //德芯的设备
+                        SingletonInfo.GetInstance().packnum -= 1;
+                    }
+                    //if (tmp.AUDIOREBACKSERVERIP != null)
+                    //{
+                    //    string name = Dns.GetHostName();
+                    //    IPAddress[] ipadrlist = Dns.GetHostAddresses(name);
+                    //    foreach (var item in ipadrlist)
+                    //    {
+                    //        if (item.ToString() == tmp.AUDIOREBACKSERVERIP)
+                    //        {
+                    //            //OpenReceiveTool(tmp.AUDIOREBACKSERVERIP, Convert.ToInt32(tmp.AUDIOREBACKPORT),SingletonInfo.GetInstance().FTPServer,SingletonInfo.GetInstance().FTPPort,SingletonInfo.GetInstance().FTPUserName,SingletonInfo.GetInstance().FTPPwd,SingletonInfo.GetInstance().ftppath);
 
-
-                    }    
+                    //            OpenReceiveTool(tmp.AUDIOREBACKSERVERIP, Convert.ToInt32(tmp.AUDIOREBACKPORT), SingletonInfo.GetInstance().FTPServer, SingletonInfo.GetInstance().FTPPort, SingletonInfo.GetInstance().FTPUserName, SingletonInfo.GetInstance().FTPPwd, "\\");
+                    //        }
+                    //    }
+                    //}
                     //由TS指令服务实现
                     //tmp.Audio_reback_mode = 1;//1 UDP;2 TCP;3串口;其它值预留  现暂时默认设置为udp  20180129
                     //SendbackDetail sendbackDetail = new SendbackDetail();
@@ -718,14 +1026,14 @@ namespace GXEBRebackSaveTool.Utils
                                 break;
                             case "TsCmd_ValueID":
                                 tmp.DeviceIdList = new List<int>();
-                                if(tmp.TsCmd_Mode=="区域")
+                                if (tmp.TsCmd_Mode == "区域")
                                 {
                                     string strAreaId = item.Split('~')[1];
                                     string[] ids = strAreaId.Split(',');
                                     List<int> tt = new List<int>();
                                     for (int i = 0; i < ids.Length; i++)
                                     {
-                                        tt.Add(Convert.ToInt32(ids[i]) );
+                                        tt.Add(Convert.ToInt32(ids[i]));
                                     }
 
                                     tmp.DeviceIdList = db.AeraCode2DeviceID(tt);
@@ -734,20 +1042,20 @@ namespace GXEBRebackSaveTool.Utils
                                 {
                                     string strDeviceID = item.Split('~')[1];
                                     string[] ids = strDeviceID.Split(',');
-                                  
+
                                     foreach (var id in ids)
                                     {
                                         tmp.DeviceIdList.Add(Convert.ToInt32(id));
                                     }
                                 }
-                                
+
                                 break;
                             case "TsCmd_PlayCount":
                                 tmp.TsCmd_PlayCount = Convert.ToInt32(item.Split('~')[1]);
                                 break;
                         }
                     }
-                    tmp.FileID = (SingletonInfo.GetInstance().FileID + 1).ToString("X").PadLeft(4,'0');
+                    tmp.FileID = (SingletonInfo.GetInstance().FileID + 1).ToString("X").PadLeft(4, '0');
                     SingletonInfo.GetInstance().FileID += 1;
                     SendbackDetail sendbackDetail = new SendbackDetail();
                     sendbackDetail.tag = Equipment.TTS;
@@ -759,6 +1067,26 @@ namespace GXEBRebackSaveTool.Utils
             }
         }
 
+
+        /// <summary>
+        /// 判断列表中是否有端口    有的话 返回true 没有返回false
+        /// </summary>
+        /// <param name="udpport"></param>
+        /// <returns></returns>
+        private bool Chenckudpport(string udpport)
+        {
+            bool flag = false;
+            string findport = SingletonInfo.GetInstance().PortList.Find(x => x == udpport);
+            if (findport == null)
+            {
+                SingletonInfo.GetInstance().PortList.Add(udpport);
+            }
+            else
+            {
+                flag = true;
+            }
+            return flag;
+        }
 
         private void OpenReceiveTool(string ip, int port, string FTPServer, string FTPPort, string FTPUserName, string FTPPwd,string ftppath)
         {

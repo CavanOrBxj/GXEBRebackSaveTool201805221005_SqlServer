@@ -9,6 +9,7 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Timers;
 using System.Windows.Forms;
 
 namespace GXEBRebackSaveTool
@@ -20,18 +21,12 @@ namespace GXEBRebackSaveTool
         private NetServer netServer;
         private IniFiles ini;
         private DataDealHelper dataHelper;
-
         private Thread dealThread;  //数据解析线程
         private Thread saveThread;  //数据持久化线程
         private System.Timers.Timer dbTimer;  //定时存储到数据库
-
         private bool isServerRun;
         private bool saveDataToLog;
-
-     
-
         private IMessageConsumer m_consumer; //消费者
-
         private IMessageProducer m_producer; //生产者
         private bool isConn = false; //是否已与MQ服务器正常连接
         private int timercounter;
@@ -45,13 +40,19 @@ namespace GXEBRebackSaveTool
         /// </summary>
         public static MQ m_mq;
 
+        public System.Timers.Timer aTimer = new System.Timers.Timer();
+
+         public  object locker;
         public FormMain()
         {
             InitializeComponent();
             Load += FormMain_Load;
             FormClosing += FormMain_FormClosing;
             Text = Text + "-" + Application.ProductVersion;
-            
+            aTimer.Elapsed += new System.Timers.ElapsedEventHandler(TimeEvent);
+            aTimer.Interval = 2000;
+            aTimer.Enabled = true;
+            locker = new object();
         }
 
         private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
@@ -95,7 +96,6 @@ namespace GXEBRebackSaveTool
             }
             catch (Exception)
             {
-
                 this.Close();
             }
        
@@ -111,16 +111,14 @@ namespace GXEBRebackSaveTool
             DataBase = new DBHelper();
             dataHelper = new DataDealHelper(DataBase);
 
-                textTcpPort.Text = ini.ReadValue("LocalHost", "TCPLocalPort");
-                textUdpPort.Text = ini.ReadValue("LocalHost", "UDPLocalPort");
+            textTcpPort.Text = ini.ReadValue("LocalHost", "TCPLocalPort");
+            textUdpPort.Text = ini.ReadValue("LocalHost", "UDPLocalPort");
+            SingletonInfo.GetInstance().ProtocolCode = ini.ReadValue("ProtocolType", "type");
 
-                SingletonInfo.GetInstance().ProtocolCode = ini.ReadValue("ProtocolType", "type");
 
-
-                //初始化处理线程
-                dealThread = new Thread(dataHelper.DealStatus);
-                saveThread = new Thread(dataHelper.SaveStatus);
-
+            //初始化处理线程
+            dealThread = new Thread(dataHelper.DealStatus);
+            saveThread = new Thread(dataHelper.SaveStatus);
             //初始化存储数据库的计时器（5秒更新一次数据库）
             dbTimer = new System.Timers.Timer(10000);
             dbTimer.AutoReset = true;
@@ -128,19 +126,21 @@ namespace GXEBRebackSaveTool
 
             EquipmentHelper.MyEvent += new EquipmentHelper.MyDelegate(SendDataResponse);
             DataDealHelper.MyEvent += new DataDealHelper.MyDelegate(SendDataResponse);
-
             this.timercounter = 0;
-
-
             SingletonInfo.GetInstance().FTPServer = ini.ReadValue("Reback", "FTPServer");
             SingletonInfo.GetInstance().FTPPort = ini.ReadValue("Reback", "FTPPort");
             SingletonInfo.GetInstance().FTPUserName = ini.ReadValue("Reback", "FTPUserName");
             SingletonInfo.GetInstance().FTPPwd = ini.ReadValue("Reback", "FTPPwd");
-         //   string tmpftppath = ini.ReadValue("Reback", "ftppath").Split(':')[1];
-          //  SingletonInfo.GetInstance().ftppath =tmpftppath.Remove(0,1); 
+            SingletonInfo.GetInstance().SavePath= ini.ReadValue("Reback", "FileSavePath");
+            if (!Directory.Exists(SingletonInfo.GetInstance().SavePath))//如果不存在就创建file文件夹
+            {
+                Directory.CreateDirectory(SingletonInfo.GetInstance().SavePath);
+            }
+            //   string tmpftppath = ini.ReadValue("Reback", "ftppath").Split(':')[1];
+            //  SingletonInfo.GetInstance().ftppath =tmpftppath.Remove(0,1); 
 
 
-            btnStart_Click(null,null);
+            btnStart_Click(null, null);
             log.Info("回传服务启动：启动时间->" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
         }
 
@@ -158,7 +158,7 @@ namespace GXEBRebackSaveTool
         {
             try
             {
-                FormMain.m_mq.uri = "tcp://" + this.ini.ReadValue("MQ", "MQIP") + ":" + this.ini.ReadValue("MQ", "MQPORT");
+                FormMain.m_mq.uri = "failover:tcp://" + this.ini.ReadValue("MQ", "MQIP") + ":" + this.ini.ReadValue("MQ", "MQPORT");
                 FormMain.m_mq.Start();
                 this.isConn = true;
                 this.m_consumer = FormMain.m_mq.CreateConsumer(false, this.ini.ReadValue("MQ", "TopicName"));
@@ -253,6 +253,9 @@ namespace GXEBRebackSaveTool
                     btnStart.Text = "启动服务";
                     return;
                 }
+
+                SingletonInfo.GetInstance().udpport = textUdpPort.Text;
+            
                 this.timer1.Enabled = true;
                 this.ConnectMQServer();
                 string portStr = ini.ReadValue("LocalHost", "UDPLocalPort");
@@ -301,9 +304,9 @@ namespace GXEBRebackSaveTool
                 {
                     dbTimer.Start();
                 }
-
-                #region 同时启动tcp和udp
                 
+                #region 同时启动tcp和udp
+
                 netServer = new NetServer(tcpPort, udpPort, ip);
                 netServer.TCPReceiveData += Server_TCPReceiveData;
                 netServer.UDPReceiveData += Server_UDPReceiveData;
@@ -330,12 +333,27 @@ namespace GXEBRebackSaveTool
             }
         }
 
+
+     
+
+       
         private void Server_UDPReceiveData(object sender, SocketDataEventArgs e)
         {
             try
             {
                 if (e.Data != null && e.Data.Length > 0)
                 {
+                    if (e.Data.Length > 23)
+                    {
+                        if (e.Data[21]==0x38 && e.Data[22] == 0x03)
+                        {
+                            //表明是音频回传数据帧
+                            SingletonInfo.GetInstance().pppp += 1;
+                            dataHelper.EnqueueRecord(e.Data);
+                            log.Info("收到数据帧:" + SingletonInfo.GetInstance().pppp.ToString());
+                            return;
+                        }
+                    }
                     dataHelper.Enqueue(e.Data, e.ConnId, e.EndPoint.ToString().Split(':')[0], Convert.ToInt32(e.EndPoint.ToString().Split(':')[1]));
                     Invoke(new MethodInvoker(() =>
                     {
@@ -505,7 +523,19 @@ namespace GXEBRebackSaveTool
                     break;
                 case Equipment.FileName://文件调取
 
-                  //由TS指令服务去实现了  但是接收还是它
+                    //表示非德芯的
+                    TransferCode select = (TransferCode)SendObject.Extras;
+                    string ip = ini.ReadValue("LocalHost", "LoaclIP");
+                    string tcpPortStr = ini.ReadValue("LocalHost", "TCPLocalPort");
+                    ushort tcpPort = ushort.Parse(tcpPortStr);
+                    ushort udpPort = ushort.Parse(select.AUDIOREBACKPORT.ToString());
+                    NetServer netServerTMP=new NetServer(tcpPort, udpPort, ip);
+                    netServerTMP.TCPReceiveData += Server_TCPReceiveData;
+                    netServerTMP.UDPReceiveData += Server_UDPReceiveData;
+                    netServerTMP.Start();
+                    SingletonInfo.GetInstance().ReceiveNetServerList.Add(netServerTMP);
+                    
+                    //由TS指令服务去实现了  但是接收还是它
 
                     //TransferCode select = (TransferCode)SendObject.Extras;
                     //byte[] HeadDataFile = new byte[] { };
@@ -609,6 +639,11 @@ namespace GXEBRebackSaveTool
                     //    //日志打印  20180305
                     //    log.Info("录音文件调取指令已发送");  
                     //}
+
+
+
+                    #region  创建接收音频数据的线程
+                    #endregion
 
                     break;
                 case Equipment.TTS://文本转语音
@@ -1095,6 +1130,185 @@ namespace GXEBRebackSaveTool
             catch (Exception)
             {
                 
+            }
+        }
+
+
+        private  void TimeEvent(object source, ElapsedEventArgs e)
+        {
+            if (SingletonInfo.GetInstance().FileDic.Count > 0)
+            {
+                lock (locker)
+                {
+                    foreach (var item in SingletonInfo.GetInstance().FileDic)
+                    {
+                        if (item.Value.DataList.Count > 0)
+                        {
+                            if (DateTime.Compare(DateTime.Now, item.Value.ReceiveTime) > 0)//接收超时了 则立即组装成文件
+                            {
+                                log.Info("接收超时，组装文件");
+                                DataDetail tunerslastpack = item.Value.DataList.Find(x=>x.PackageNum=="-1");
+                                if (tunerslastpack!=null)
+                                {
+                                    item.Value.DataList.Remove(tunerslastpack);
+                                }
+
+                                List<DataDetail> CompleteList = SortList(item.Value.DataList);
+                                Thread SaveFile = new Thread(new ParameterizedThreadStart(SaveFiletoMP3));
+                                SaveFile.Start((object)CompleteList);
+                                SingletonInfo.GetInstance().pppp = 0;
+                            }
+                            else
+                            {
+                                bool flag = false;
+
+                                bool flag2 = false;//true表示图南 需要去掉最后一帧 false表示不需要去掉最后一帧
+
+                                //没有超时 只需考虑接收完成的情况
+                                foreach (DataDetail dd in item.Value.DataList)
+                                {
+                                    // if (dd.PackageNum == "FFFFFFFF")
+                                    if (dd.PackageNum == SingletonInfo.GetInstance().packnum.ToString())//临时版本 20181108
+                                    {
+                                        log.Info("收到帧数一致，组装文件,数据帧为："+ dd.PackageNum+"此时packnum："+ SingletonInfo.GetInstance().packnum.ToString());
+                                        flag = true;
+                                        if (item.Value.DataList.Count > SingletonInfo.GetInstance().packnum)
+                                        {
+                                            flag2 = true;
+                                        }
+                                        break;
+                                    }
+                                }
+
+                                if (flag)
+                                {
+                                    if (flag2)
+                                    {
+                                        if (item.Value.DataList.Count > SingletonInfo.GetInstance().packnum)
+                                        {
+                                            item.Value.DataList.RemoveAt(item.Value.DataList.Count - 1);
+                                        }
+                                    }
+                                    List<DataDetail> CompleteList = SortList(item.Value.DataList);
+                                    Thread SaveFile = new Thread(new ParameterizedThreadStart(SaveFiletoMP3));
+                                    SaveFile.Start((object)CompleteList);
+                                    SingletonInfo.GetInstance().pppp = 0;
+                                    log.Info("文件接收完成，组装文件");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private  List<DataDetail> SortList(List<DataDetail> OldList)
+        {
+            List<DataDetail> NewList = new List<DataDetail>();
+            if (OldList.Count > 0)
+            {
+                bool flag = false;//判断有无结尾帧
+                int local = 0;
+
+                for (int i = 0; i < OldList.Count; i++)
+                {
+                    // if (OldList[i].PackageNum == "FFFFFFFF")
+                    if (OldList[i].PackageNum == SingletonInfo.GetInstance().packnum.ToString())//临时版本 20181108
+                    {
+
+                        flag = true;
+                        local = i;
+                    }
+                }
+
+                if (flag)
+                {
+                    //有结尾帧
+                    DataDetail LastOne = OldList[local];
+
+                    OldList.Remove(LastOne);
+
+                    int gap = OldList.Count / 2; //取长度的一半
+                    bool HasChange = true;
+                    while (gap > 1 || HasChange)
+                    {
+                        HasChange = false;
+                        for (int i = 0; i + gap < OldList.Count; i++)
+                        {
+                            if (Convert.ToInt64(OldList[i].PackageNum, 16) > Convert.ToInt64(OldList[i + gap].PackageNum, 16))
+                            {
+                                DataDetail temp = OldList[i];
+                                OldList[i] = OldList[i + gap];
+                                OldList[i + gap] = temp;//交换并设置下一轮循环
+                                HasChange = true;
+                            }//当条件不满足的时候证明该间距内没有变化（有序）了
+                            if (gap > 1)
+                            {
+                                gap /= 2;
+                            }
+                        }
+                    }
+                    OldList.Add(LastOne);
+                }
+                else
+                {
+                    //无结尾帧
+                    int gap = OldList.Count / 2; //取长度的一半
+                    bool HasChange = true;
+                    while (gap > 1 || HasChange)
+                    {
+                        HasChange = false;
+                        for (int i = 0; i + gap < OldList.Count; i++)
+                        {
+                            if (Convert.ToInt64(OldList[i].PackageNum, 16) > Convert.ToInt64(OldList[i + gap].PackageNum, 16))
+                            {
+                                DataDetail temp = OldList[i];
+                                OldList[i] = OldList[i + gap];
+                                OldList[i + gap] = temp;//交换并设置下一轮循环
+                                HasChange = true;
+                            }//当条件不满足的时候证明该间距内没有变化（有序）了
+                            if (gap > 1)
+                            {
+                                gap /= 2;
+                            }
+                        }
+                    }
+                }
+            }
+
+            NewList = OldList;
+            return NewList;
+        }
+
+        private  void SaveFiletoMP3(object ob)
+        {
+            try
+            {
+                List<DataDetail> CompleteList = (List<DataDetail>)ob;
+                List<byte> DataList = new List<byte>();
+                if (CompleteList.Count > 0)
+                {
+                    foreach (DataDetail item in CompleteList)
+                    {
+                        foreach (byte bt in item.AudioData)
+                        {
+                            DataList.Add(bt);
+                        }
+                    }
+                    string filename = CompleteList[0].FileName + ".mp3";
+                    byte[] buffer = DataList.ToArray();
+                    string path = SingletonInfo.GetInstance().SavePath + "\\" + filename;
+                    FileStream fs = new FileStream(path, FileMode.Create);//新建文件
+                    fs.Write(buffer, 0, buffer.Length);
+                    fs.Flush();
+                    fs.Close();
+                    SingletonInfo.GetInstance().FileDic.Remove(CompleteList[0].FileName);
+                    log.Info("文件保存成功！");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
             }
         }
 

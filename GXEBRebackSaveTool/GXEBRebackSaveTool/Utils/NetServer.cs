@@ -8,7 +8,7 @@ namespace GXEBRebackSaveTool.Utils
     /// <summary>
     /// 支持tcp、udp
     /// </summary>
-    class NetServer : IDisposable
+     public  class NetServer : IDisposable
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(typeof(NetServer));
 

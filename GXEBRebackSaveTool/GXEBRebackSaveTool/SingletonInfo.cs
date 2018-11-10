@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Collections.Concurrent;
 using GXEBRebackSaveTool.Models;
+using GXEBRebackSaveTool.Utils;
 
 namespace GXEBRebackSaveTool
 {
@@ -32,6 +33,16 @@ namespace GXEBRebackSaveTool
         /// 协议类型码    1表示国标 2表示图南   目前国标只有达州在用   图南协议是广西版本的国标，即老国标
         /// </summary>
         public string ProtocolCode;
+        public Dictionary<string, FileAll> FileDic;
+        public string SavePath;//回传文件接收路径
+        public List<string> PortList;//端口存储列表
+        public int packnum;
+        public string udpport;//回传状态UDP端口
+
+
+        public List<NetServer> ReceiveNetServerList;
+
+        public int pppp;//
 
         private SingletonInfo()                                                                 
         {
@@ -41,14 +52,20 @@ namespace GXEBRebackSaveTool
          //   MonitorPlatformMessageList = new List<MonitorPlatformMessage>();
             HistoryHeaderData = new Dictionary<string, byte[]>();
             FileID = 0;
-
             FTPServer = "";
             FTPPort = "";
             FTPUserName = "";
             FTPPwd = "";
             ftppath = "";
-
             ProtocolCode = "";
+            FileDic = new Dictionary<string, FileAll>();
+            SavePath = "";
+            PortList = new List<string>();
+            packnum = 0;
+            udpport = "";
+
+            ReceiveNetServerList = new List<NetServer>();
+            pppp = 0;
         }
 
    
@@ -60,9 +77,5 @@ namespace GXEBRebackSaveTool
             }
             return _singleton;
         }
-
-   
-
-
     }
 }
