@@ -20,13 +20,7 @@ namespace GXEBRebackSaveTool
 
      //   public List<MonitorPlatformMessage> MonitorPlatformMessageList;
         public Dictionary<string, byte[]> HistoryHeaderData;//历史接收到的数据头
-
-        public int FileID;//文件ID  平台发送文本到服务 服务生成一个文件ID（每次自增 最大65535）  
-
-        public string FTPServer;
-        public string FTPPort;
-        public string FTPUserName;
-        public string FTPPwd;
+        public int FileID;//文件ID  平台发送文本到服务 服务生成一个文件ID（每次自增 最大65535） 
         public string ftppath;
 
         /// <summary>
@@ -38,24 +32,19 @@ namespace GXEBRebackSaveTool
         public List<string> PortList;//端口存储列表
         public int packnum;
         public string udpport;//回传状态UDP端口
-
-
         public List<NetServer> ReceiveNetServerList;
-
         public int pppp;//
+        public  List<FTPSender> ftpsenderList;//ftp传输列表
+        public bool FTPEnable;//ftp使能 
+        public int FTPPathNum;//ftp传输通道数
 
         private SingletonInfo()                                                                 
         {
             factorycode = ""; //
             TerminalType = false;
             Version = "";
-         //   MonitorPlatformMessageList = new List<MonitorPlatformMessage>();
             HistoryHeaderData = new Dictionary<string, byte[]>();
             FileID = 0;
-            FTPServer = "";
-            FTPPort = "";
-            FTPUserName = "";
-            FTPPwd = "";
             ftppath = "";
             ProtocolCode = "";
             FileDic = new Dictionary<string, FileAll>();
@@ -63,9 +52,11 @@ namespace GXEBRebackSaveTool
             PortList = new List<string>();
             packnum = 0;
             udpport = "";
-
             ReceiveNetServerList = new List<NetServer>();
             pppp = 0;
+            ftpsenderList = new List<FTPSender>();
+            FTPEnable = false;
+            FTPPathNum = 0;
         }
 
    

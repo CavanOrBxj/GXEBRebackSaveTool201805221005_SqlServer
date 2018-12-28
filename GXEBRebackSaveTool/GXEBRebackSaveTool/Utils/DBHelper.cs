@@ -14,7 +14,6 @@ namespace GXEBRebackSaveTool.Utils
     public class DBHelper
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(typeof(DBHelper));
-
         private SqlConnection conn;
         private const int TIMEOUT = 120;
 
@@ -113,7 +112,6 @@ namespace GXEBRebackSaveTool.Utils
             return reslut != -1;
         }
 
-
         public bool UpdateSrvEquipmentStatusBatch_Nation(NSEquipmentDetail selectone)
         {
             SqlDataAdapter sd = null;
@@ -165,7 +163,6 @@ namespace GXEBRebackSaveTool.Utils
             }
             return reslut != -1;
         }
-
 
         public void BulkEquipmentDetail(DataTable dt)
         {
@@ -220,7 +217,6 @@ namespace GXEBRebackSaveTool.Utils
             }
             finally { conn.Close(); }
         }
-
 
         public void BulkEquipmentDetailNation(DataTable dt)
         {
@@ -292,7 +288,6 @@ namespace GXEBRebackSaveTool.Utils
             }
             finally { conn.Close(); }
         }
-
 
         public void BulkNewEquipmentDetail(DataTable dt)
         {
@@ -439,17 +434,17 @@ namespace GXEBRebackSaveTool.Utils
                 if (rowCount != null)
                 {
                     sqlUpdate = string.Format("update Srv_AudioRecorde set recordingcategory='{0}', rebackfiletype='{1}', " +
-                        "recording_duration='{2}', packs_totalnumber='{3}', srv_time='{4}' where filename='{5}'",
+                        "recording_duration='{2}', packs_totalnumber='{3}', srv_time='{4}',ProgressBar={5} where filename='{6}'",
                         detail.RecordingCategoryFormat, detail.RebackFileTypeFormat, detail.RecordingDurationFormat,
-                        detail.PacksTotalNumberFormat, detail.SrvTime, detail.FileNameFormat);
+                        detail.PacksTotalNumberFormat, detail.SrvTime,0, detail.FileNameFormat);
                 }
                 else
                 {
                     sqlUpdate = string.Format("insert into Srv_AudioRecorde " +
-                        "(recordingcategory,rebackfiletype,recording_duration,packs_totalnumber,srv_time,srv_physical_code,filename) " +
-                        "values('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}')",
+                        "(recordingcategory,rebackfiletype,recording_duration,packs_totalnumber,srv_time,srv_physical_code,filename,ProgressBar) " +
+                        "values('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}',{7})",
                         detail.RecordingCategoryFormat, detail.RebackFileTypeFormat, detail.RecordingDurationFormat,
-                        detail.PacksTotalNumberFormat, detail.SrvTime, detail.PhysicalAddressFormat, detail.FileNameFormat);
+                        detail.PacksTotalNumberFormat, detail.SrvTime, detail.PhysicalAddressFormat, detail.FileNameFormat,0);
                 }
                 cmd.CommandText = sqlUpdate;
                 cmd.ExecuteNonQuery();
@@ -457,6 +452,33 @@ namespace GXEBRebackSaveTool.Utils
             catch (Exception ex)
             {
                 log.Error("更新或插入录音记录异常", ex);
+            }
+            finally { conn.Close(); }
+        }
+
+
+        public void UpdateAudioRecorde(string filename,int percent)
+        {
+            string sql = "select filename from Srv_AudioRecorde where filename='" + filename + "'";
+            try
+            {
+                SqlCommand cmd = new SqlCommand(sql, this.conn);
+                if (this.conn.State != ConnectionState.Open)
+                {
+                    this.conn.Open();
+                }
+                var rowCount = cmd.ExecuteScalar();
+                string sqlUpdate = "";
+                if (rowCount != null)
+                {
+                    sqlUpdate = string.Format("update Srv_AudioRecorde set ProgressBar={0} where filename='{1}'", percent, filename);
+                }
+                cmd.CommandText = sqlUpdate;
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                log.Error("更新录音记录异常", ex);
             }
             finally { conn.Close(); }
         }
@@ -561,7 +583,6 @@ namespace GXEBRebackSaveTool.Utils
             return DeviceIdList;
         
         }
-
 
         public List<string> PhysicalSearch(List<int> DeviceID)
         {

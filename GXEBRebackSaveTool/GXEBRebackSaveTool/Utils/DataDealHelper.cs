@@ -191,9 +191,7 @@ namespace GXEBRebackSaveTool.Utils
                             List<DataDetail> dataNew = HandlerQueue_Record(dataByte); //解析数据
                             if (dataNew != null)
                             {
-
                                 string filename = dataNew[0].FileName;
-
                                 string filepath = Directory.GetCurrentDirectory();
                                 if (Directory.EnumerateFiles(filepath, filename + ".*", SearchOption.AllDirectories).Any())
                                 {
@@ -201,8 +199,8 @@ namespace GXEBRebackSaveTool.Utils
                                 }
                                 if (SingletonInfo.GetInstance().FileDic.ContainsKey(filename))
                                 {
+                                    //文件已经在传了
                                     FileAll file = SingletonInfo.GetInstance().FileDic[filename];
-                                    //  file.ReceiveTime = file.ReceiveTime.AddSeconds(2);
                                     file.ReceiveTime = DateTime.Now.AddSeconds(10);
                                     foreach (DataDetail item in dataNew)
                                     {
@@ -211,8 +209,8 @@ namespace GXEBRebackSaveTool.Utils
                                 }
                                 else
                                 {
+                                    //文件刚开始传
                                     FileAll file = new FileAll();
-                                    // file.ReceiveTime = DateTime.Now.AddSeconds(2);
                                     file.ReceiveTime = DateTime.Now;
                                     file.DataList = new List<DataDetail>();
                                     foreach (DataDetail item in dataNew)
@@ -389,10 +387,8 @@ namespace GXEBRebackSaveTool.Utils
 
                 flag = true;
             }
-
             return flag;
         }
-
 
         /// <summary>
         /// 输出数据到数据库
@@ -467,7 +463,6 @@ namespace GXEBRebackSaveTool.Utils
                 beforeAnalysisQueue_record.Enqueue(data);
             }
         }
-
 
         private NSEquipmentDetail HandlerQueue_NationalStandard(EquipmentSource datare)
         {
