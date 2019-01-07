@@ -136,7 +136,6 @@ namespace GXEBRebackSaveTool.Utils
         /// </summary>
         public void DealStatus()
         {
-          
             while (isRun)
             {
                 try
@@ -1083,6 +1082,7 @@ namespace GXEBRebackSaveTool.Utils
             return flag;
         }
 
+        #region 调用第三方接收工具 目前不用该方法
         private void OpenReceiveTool(string ip, int port, string FTPServer, string FTPPort, string FTPUserName, string FTPPwd,string ftppath)
         {
             List<int> pid = new List<int>();
@@ -1107,6 +1107,7 @@ namespace GXEBRebackSaveTool.Utils
             process.Start();
             log.Error("打开接收工具");
         }
+        #endregion
 
         public List<string> DecId2Physical(List<int> DeviceId)
         {
