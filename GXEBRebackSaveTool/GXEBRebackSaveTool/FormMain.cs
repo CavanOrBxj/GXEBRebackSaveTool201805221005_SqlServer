@@ -191,10 +191,9 @@ namespace GXEBRebackSaveTool
                 this.m_consumer.Listener += this.consumer_listener;
                 FormMain.m_mq.CreateProducer(false, this.ini.ReadValue("MQ", "TopicName"));
             }
-            catch (Exception)
+            catch (Exception  ex)
             {
-
-
+                log.Info("初始化MQ信息失败："+ex.Message);
             }
         }
         private void consumer_listener(IMessage message)
@@ -210,8 +209,9 @@ namespace GXEBRebackSaveTool
                 }
                 dataHelper.Serialize(strMsg);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                log.Info("MQ信息消费异常："+ex.Message);
                 this.m_consumer.Close();
             }
         }
@@ -233,7 +233,7 @@ namespace GXEBRebackSaveTool
             }
             catch (Exception iniEx)
             {
-                FormMain.log.Error("INI配置文件异常", iniEx);
+                log.Error("INI配置文件异常", iniEx);
                 return false;
             }
             return true;
@@ -253,8 +253,9 @@ namespace GXEBRebackSaveTool
                 textTcpPort.Text = ini.ReadValue("LocalHost", "TCPLocalPort");
                 textUdpPort.Text = ini.ReadValue("LocalHost", "UDPLocalPort");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                log.Info("服务设置失败："+ex.StackTrace);
             }
         }
 
@@ -344,7 +345,7 @@ namespace GXEBRebackSaveTool
             }
             catch (Exception ex)
             {
-
+                log.Info("回传服务启动失败："+ex.Message);
                 MessageBox.Show(ex.ToString());
                 //启动异常则关闭服务
                 if (netServer != null)
@@ -1003,15 +1004,22 @@ namespace GXEBRebackSaveTool
         /// </summary>
         public void InitDatabase()
         {
-            if (DataBase == null)
+            try
             {
-                DataBase = new DBHelper();
+                if (DataBase == null)
+                {
+                    DataBase = new DBHelper();
+                }
+                string serverName = ini.ReadValue("Database", "ServerName");
+                string database = ini.ReadValue("Database", "DataBase");
+                string logID = ini.ReadValue("Database", "LogID");
+                string logPass = ini.ReadValue("Database", "LogPass");
+                DataBase.SetConnectString(serverName, logID, logPass, database);
             }
-            string serverName = ini.ReadValue("Database", "ServerName");
-            string database = ini.ReadValue("Database", "DataBase");
-            string logID = ini.ReadValue("Database", "LogID");
-            string logPass = ini.ReadValue("Database", "LogPass");
-            DataBase.SetConnectString(serverName, logID, logPass, database);
+            catch (Exception ex)
+            {
+                log.Info("初始化数据库失败："+ex.Message);
+            }
         }
 
         private void button1_Click(object sender, EventArgs e)

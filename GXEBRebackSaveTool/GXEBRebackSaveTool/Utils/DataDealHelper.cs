@@ -368,7 +368,7 @@ namespace GXEBRebackSaveTool.Utils
                 }
                 catch (Exception ex)
                 {
-                    // DataDealHelper.log.Error("数据缓存异常-" + this.afterAnalysisQueue.Count, ex);
+                     DataDealHelper.log.Error("数据缓存异常-", ex);
                 }
             }
         }
@@ -394,54 +394,63 @@ namespace GXEBRebackSaveTool.Utils
         /// </summary>
         public void SaveEqStatus()
         {
-            DataTable dt = null;
-            DataTable dtNew = null;
-            DataTable dtNa = null;
-
-            if (SingletonInfo.GetInstance().ProtocolCode == "1")
+            try
             {
-                //国标情况
-                lock (dtsrvStatus_national.Rows.SyncRoot) //多线程环境下锁住DataTable中的Rows集合同时也锁住了Columns集合
+                DataTable dt = null;
+                DataTable dtNew = null;
+                DataTable dtNa = null;
+
+                if (SingletonInfo.GetInstance().ProtocolCode == "1")
                 {
-                    if (dtsrvStatus_national.Rows.Count > 0)
+                    //国标情况
+                    lock (dtsrvStatus_national.Rows.SyncRoot) //多线程环境下锁住DataTable中的Rows集合同时也锁住了Columns集合
                     {
-                        dtNa = dtsrvStatus_national.Copy();
-                        dtsrvStatus_national.Rows.Clear();
+                        if (dtsrvStatus_national.Rows.Count > 0)
+                        {
+                            dtNa = dtsrvStatus_national.Copy();
+                            dtsrvStatus_national.Rows.Clear();
+                        }
+                    }
+
+                    if (db != null && dtNa != null)
+                    {
+                        db.BulkEquipmentDetailNation(dtNa);
                     }
                 }
-
-                if (db != null && dtNa != null )
+                else
                 {
-                    db.BulkEquipmentDetailNation(dtNa);
+                    //图南情况
+                    lock (dtStatus.Rows.SyncRoot)
+                    {
+                        if (dtStatus.Rows.Count > 0)
+                        {
+                            dt = dtStatus.Copy();
+                            dtStatus.Rows.Clear();
+                        }
+                    }
+                    lock (dtStatusNew.Rows.SyncRoot) //多线程环境下锁住DataTable中的Rows集合同时也锁住了Columns集合
+                    {
+                        if (dtStatusNew.Rows.Count > 0)
+                        {
+                            dtNew = dtStatusNew.Copy();
+                            dtStatusNew.Rows.Clear();
+                        }
+                    }
+                    if (db != null && dt != null && dtNew != null)
+                    {
+                        var status = db.UpdateSrvEquipmentStatusBatch(dt);
+                        db.BulkEquipmentDetail(dt);
+                        db.BulkNewEquipmentDetail(dtNew);
+                        //  log.Info("数据库存储结束-" + status);
+                    }
                 }
             }
-            else
+            catch (Exception  ex)
             {
-                //图南情况
-                lock (dtStatus.Rows.SyncRoot)
-                {
-                    if (dtStatus.Rows.Count > 0)
-                    {
-                        dt = dtStatus.Copy();
-                        dtStatus.Rows.Clear();
-                    }
-                }
-                lock (dtStatusNew.Rows.SyncRoot) //多线程环境下锁住DataTable中的Rows集合同时也锁住了Columns集合
-                {
-                    if (dtStatusNew.Rows.Count > 0)
-                    {
-                        dtNew = dtStatusNew.Copy();
-                        dtStatusNew.Rows.Clear();
-                    }
-                }
-                if (db != null && dt != null && dtNew != null)
-                {
-                    var status = db.UpdateSrvEquipmentStatusBatch(dt);
-                    db.BulkEquipmentDetail(dt);
-                    db.BulkNewEquipmentDetail(dtNew);
-                  //  log.Info("数据库存储结束-" + status);
-                }
+
+                log.Info("数据库存储异常-" + ex.StackTrace);
             }
+           
         }
 
         /// <summary>
@@ -681,6 +690,7 @@ namespace GXEBRebackSaveTool.Utils
             }
             catch (Exception ex)
             {
+                log.Error("终端工作状态解析异常", ex);
                 return null;
             }
         }
