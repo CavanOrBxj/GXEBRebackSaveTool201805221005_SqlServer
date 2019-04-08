@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -33,7 +35,7 @@ namespace GXEBRebackSaveTool
         /// <summary>
         /// 连接的数据库
         /// </summary>
-        public static DBHelper DataBase { get; set; }
+     //   public static DBHelper DataBase { get; set; }
 
         /// <summary>
         /// MQ连接
@@ -43,6 +45,8 @@ namespace GXEBRebackSaveTool
         public System.Timers.Timer aTimer = new System.Timers.Timer();
 
         public object locker;
+
+        public bool printflag;
         public FormMain()
         {
             InitializeComponent();
@@ -108,8 +112,8 @@ namespace GXEBRebackSaveTool
 
             //初始化数据解析类
             bool iniCheck = CheckIniConfig();
-            DataBase = new DBHelper();
-            dataHelper = new DataDealHelper(DataBase);
+          //  DataBase = new DBHelper();
+            dataHelper = new DataDealHelper(SingletonInfo.GetInstance().DataBase);
 
             textTcpPort.Text = ini.ReadValue("LocalHost", "TCPLocalPort");
             textUdpPort.Text = ini.ReadValue("LocalHost", "UDPLocalPort");
@@ -166,6 +170,8 @@ namespace GXEBRebackSaveTool
                 pp2.ftppath = ini.ReadValue("Reback", "ftppath2");
                 SingletonInfo.GetInstance().ftpsenderList.Add(pp2);
             }
+
+            printflag = false;
             btnStart_Click(null, null);
             log.Info("回传服务启动：启动时间->" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
         }
@@ -301,7 +307,7 @@ namespace GXEBRebackSaveTool
                 ushort tcpPort = ushort.Parse(tcpPortStr);
 
                 InitDatabase();
-                if (!DataBase.OpenTest())
+                if (!SingletonInfo.GetInstance().DataBase.OpenTest())
                 {
                     MessageBox.Show("数据库连接失败，请检查数据库配置", "提示");
                     return;
@@ -373,15 +379,19 @@ namespace GXEBRebackSaveTool
                             //表明是音频回传数据帧
                             SingletonInfo.GetInstance().pppp += 1;
                             dataHelper.EnqueueRecord(e.Data);
-                            log.Info("收到数据帧:" + SingletonInfo.GetInstance().pppp.ToString());
+                         //   log.Info("收到数据帧:" + SingletonInfo.GetInstance().pppp.ToString());//数据量太大，不需要日志
                             return;
                         }
                     }
                     dataHelper.Enqueue(e.Data, e.ConnId, e.EndPoint.ToString().Split(':')[0], Convert.ToInt32(e.EndPoint.ToString().Split(':')[1]));
                     Invoke(new MethodInvoker(() =>
                     {
-                        richTextRebackMsg.AppendText("接收时间:" + DateTime.Now + "\n");
-                        richTextRebackMsg.AppendText("UDP数据:" + e.Data.ToNumberArrayString(" ", 16) + "\n");
+                        if (printflag)
+                        {
+                            richTextRebackMsg.AppendText("接收时间:" + DateTime.Now + "\n");
+                            richTextRebackMsg.AppendText("UDP数据:" + e.Data.ToNumberArrayString(" ", 16) + "\n");
+                        }
+                    
                     }));
                     if (saveDataToLog)
                     {
@@ -389,9 +399,9 @@ namespace GXEBRebackSaveTool
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                log.Info("UDP数据接收失败：" + ex.StackTrace);
             }
         }
 
@@ -404,8 +414,12 @@ namespace GXEBRebackSaveTool
                     dataHelper.Enqueue(e.Data, e.ConnId, e.EndPoint.ToString().Split(':')[0], Convert.ToInt32(e.EndPoint.ToString().Split(':')[1]));
                     Invoke(new MethodInvoker(() =>
                     {
-                        richTextRebackMsg.AppendText("接收时间:" + DateTime.Now + "\n");
-                        richTextRebackMsg.AppendText("TCP数据:" + e.Data.ToNumberArrayString(" ", 16) + "\n");
+                        if (printflag)
+                        {
+                            richTextRebackMsg.AppendText("接收时间:" + DateTime.Now + "\n");
+                            richTextRebackMsg.AppendText("TCP数据:" + e.Data.ToNumberArrayString(" ", 16) + "\n");
+                        }
+                     
                     }));
                     if (saveDataToLog)
                     {
@@ -413,9 +427,9 @@ namespace GXEBRebackSaveTool
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                log.Info("TCP数据接收失败：" + ex.StackTrace);
             }
         }
 
@@ -452,13 +466,28 @@ namespace GXEBRebackSaveTool
 
                         if (physicalAddress != null)
                         {
+
+
                             if (this.dataHelper.Clients.TryGetValue(physicalAddress, out connId))
                             {
                                 byte[] bytes2 = SendCommandShakehandsList;
-                                this.netServer.Send(connId, bytes2, bytes2.Length);
+                                //this.netServer.Send(connId, bytes2, bytes2.Length);  注释于20190402 测试
+
+                                #region  UDP数据发送改写
+
+                                UdpClient clientsh = new UdpClient();
+                               // IPAddress remoteipsh = IPAddress.Parse("");
+                             //   int remoteportsh = 111;
+                                IPEndPoint remotepointsh;
+                                this.dataHelper.ClientsIPEndPoint.TryGetValue(physicalAddress, out remotepointsh);
+
+                              //  IPEndPoint remotepointsh = new IPEndPoint(remoteipsh, remoteportsh);
+                                clientsh.Send(bytes2, bytes2.Length, remotepointsh);
+                                clientsh.Close();
+                                #endregion
 
                                 //日志打印  20180305
-                                log.Info("握手应答指令已发送");
+                              //  log.Info("握手应答指令已发送");  //数据量太大，不写日志
                             }
                         }
                         break;
@@ -1006,15 +1035,15 @@ namespace GXEBRebackSaveTool
         {
             try
             {
-                if (DataBase == null)
-                {
-                    DataBase = new DBHelper();
-                }
+                //if (DataBase == null)
+                //{
+                //    DataBase = new DBHelper();
+                //}
                 string serverName = ini.ReadValue("Database", "ServerName");
                 string database = ini.ReadValue("Database", "DataBase");
                 string logID = ini.ReadValue("Database", "LogID");
                 string logPass = ini.ReadValue("Database", "LogPass");
-                DataBase.SetConnectString(serverName, logID, logPass, database);
+               SingletonInfo.GetInstance(). DataBase.SetConnectString(serverName, logID, logPass, database);
             }
             catch (Exception ex)
             {
@@ -1175,7 +1204,7 @@ namespace GXEBRebackSaveTool
 
                                 Random r = new Random();
                                 int perc = r.Next(1, 50);
-                                DataBase.UpdateAudioRecorde(item.Key, perc);
+                              SingletonInfo.GetInstance().DataBase.UpdateAudioRecorde(item.Key, perc);
                                 //  log.Info("存文件调取进度->文件名："+ item.Key);
                                 log.Info("存文件调取进度->文件名：" + item.Key + "->进度：" + perc.ToString());
                                 Thread SaveFile = new Thread(new ParameterizedThreadStart(SaveFiletoMP3));
@@ -1218,7 +1247,7 @@ namespace GXEBRebackSaveTool
 
                                     Random r = new Random();
                                     int perc = r.Next(1, 50);
-                                    DataBase.UpdateAudioRecorde(item.Key, perc);
+                                    SingletonInfo.GetInstance().DataBase.UpdateAudioRecorde(item.Key, perc);
                                     log.Info("存文件调取进度->文件名：" + item.Key + "->进度：" + perc.ToString());
                                     Thread SaveFile = new Thread(new ParameterizedThreadStart(SaveFiletoMP3));
                                     SaveFile.Start((object)CompleteList);
@@ -1335,7 +1364,7 @@ namespace GXEBRebackSaveTool
                     }
                     Random r = new Random();
                     int perc = r.Next(51, 90);
-                    DataBase.UpdateAudioRecorde(CompleteList[0].FileName, perc);
+                  SingletonInfo.GetInstance().DataBase.UpdateAudioRecorde(CompleteList[0].FileName, perc);
                     // log.Info("存文件调取进度->文件名：" + CompleteList[0].FileName);
                     log.Info("存文件调取进度->文件名：" + CompleteList[0].FileName + "->进度：" + perc.ToString());
                     string filename = CompleteList[0].FileName + ".mp3";
@@ -1347,7 +1376,7 @@ namespace GXEBRebackSaveTool
                     fs.Close();
                     SingletonInfo.GetInstance().FileDic.Remove(CompleteList[0].FileName);
                     log.Info("文件保存成功！");
-                    DataBase.UpdateAudioRecorde(CompleteList[0].FileName, 100);
+                  SingletonInfo.GetInstance().DataBase.UpdateAudioRecorde(CompleteList[0].FileName, 100);
 
                     #region ftp传输
                     if (SingletonInfo.GetInstance().FTPEnable)
@@ -1368,7 +1397,7 @@ namespace GXEBRebackSaveTool
         {
             Random r = new Random();
             int perc = r.Next(51, 90);
-            DataBase.UpdateAudioRecorde("B20181110102825061245142310000102", perc);
+          SingletonInfo.GetInstance().DataBase.UpdateAudioRecorde("B20181110102825061245142310000102", perc);
         }
 
         /// <summary>
@@ -1391,6 +1420,28 @@ namespace GXEBRebackSaveTool
             {
                 //一路传输
                 SingletonInfo.GetInstance().ftpsenderList[0].ftphelper.UploadFile(localpath, filename);
+            }
+        }
+
+        private void btnPrint_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (btnPrint.Text == "打印-关闭")
+                {
+                    printflag = true;
+                    btnPrint.Text = "打印-开启";
+                }
+                else
+                {
+                    printflag = false;
+                    btnPrint.Text = "打印-关闭";
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
             }
         }
     }

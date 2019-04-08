@@ -25,6 +25,10 @@ namespace GXEBRebackSaveTool.Utils
         private const int MAXSTATUSCACHE = 100;
 
         private ConcurrentDictionary<string, IntPtr> clientsConn;
+
+        private ConcurrentDictionary<string, IPEndPoint> clientsConnIPEndPoint;
+
+
         private ConcurrentDictionary<string, byte[]> clientsHeadData;
         private ConcurrentQueue<EquipmentSource> beforeAnalysisQueue;
         private ConcurrentQueue<byte[]> beforeAnalysisQueue_record;//录音文件上传接收队列  20181108新增
@@ -46,7 +50,13 @@ namespace GXEBRebackSaveTool.Utils
         /// </summary>
         public ConcurrentDictionary<string, IntPtr> Clients { get { return clientsConn; } }
 
+
+        public ConcurrentDictionary<string, IPEndPoint> ClientsIPEndPoint { get { return clientsConnIPEndPoint; } }
+
         public ConcurrentDictionary<string, byte[]> ClientHD { get { return clientsHeadData; } }
+
+
+
 
 
         private AutoResetEvent autoEvent = new AutoResetEvent(false);
@@ -61,6 +71,10 @@ namespace GXEBRebackSaveTool.Utils
             try
             {
                 clientsConn = new ConcurrentDictionary<string, IntPtr>();
+
+                clientsConnIPEndPoint = new ConcurrentDictionary<string, IPEndPoint>();
+
+
                 clientsHeadData = new ConcurrentDictionary<string, byte[]>();
                 beforeAnalysisQueue = new ConcurrentQueue<EquipmentSource>();
 
@@ -144,11 +158,11 @@ namespace GXEBRebackSaveTool.Utils
                     {
                         EquipmentSource data;
                         beforeAnalysisQueue.TryDequeue(out data); //拿出数据
-                        string dadada = "";
-                        for (int i = 0; i < data.RawData.Length; i++)
-                        {
-                            dadada += " " + data.RawData[i].ToString("X2"); 
-                        }
+                        //string dadada = "";
+                        //for (int i = 0; i < data.RawData.Length; i++)
+                        //{
+                        //    dadada += " " + data.RawData[i].ToString("X2"); 
+                        //}
 
                         if (SingletonInfo.GetInstance().ProtocolCode == "1")
                         {
@@ -309,7 +323,7 @@ namespace GXEBRebackSaveTool.Utils
                                             }
                                         }
                                         this.dtStatusNew.Rows.Add(0, detail.PhysicalAddressFormat, detail.BroadcastStateFormat, detail.Voltage220Format, (fmFreList.Length > 0) ? fmFreList[0] : "0", (fmSigStrength.Length > 0) ? fmSigStrength[0] : "0", (fmFreList.Length > 1) ? fmFreList[1] : "0", (fmSigStrength.Length > 1) ? fmSigStrength[1] : "0", detail.LogicalAddressFormat, detail.PhysicalAddressFormat, detail.SrvTime, detail.PlayTypeFormat, detail.VersionsFormat, detail.DigitalTVRadioFrequencyModeFormat, detail.DigitalTVRadioFrequencyFreFormat, detail.BroadcastVolumeFormat, detail.CurrentModeSignalQualityFormat, detail.CurrentModeSignalStrengthFormat, detail.RemoteControlCenterIPAddressFormat, detail.RemoteControlCenterPortFormat, detail.AudioServerIPAddressFormat, detail.AudioServerPortFormat, detail.CallWayFormat, detail.FileNameFormat, detail.RecordingDurationFormat, detail.PacksTotalNumberFormat, detail.RebackFileTypeFormat, detail.PackStartIndexFormat, detail.LastPacksNuberFormat, detail.TerminalTypeFormat, detail.LongitudeFormat, detail.LatitudeFormat, detail.RebackModeFormat, detail.NetworkModeFormat, detail.Voltage24Format, detail.Voltage12Format, detail.AmplifierElectricCurrentFormat, detail.LocalHostFormat, detail.SubnetMaskFormat, detail.DefaultGatewayFormat, detail.FactoryName);
-                                        int count = this.dtStatusNew.Rows.Count;
+                                      //  int count = this.dtStatusNew.Rows.Count;
                                         this.SaveEqStatus();
                                     }
                                 }
@@ -480,7 +494,7 @@ namespace GXEBRebackSaveTool.Utils
             NSEquipmentDetail equipmentDetail = new NSEquipmentDetail();
             try
             {
-                log.Info("开始解析数据-" + data.Length);
+              //  log.Info("开始解析数据-" + data.Length);
               
                 string outMsg; //返回的错误信息，正确解析则返回空
                 var detail = EquipmentHelper.HandleData_NS(data, out outMsg);
@@ -527,7 +541,7 @@ namespace GXEBRebackSaveTool.Utils
             {
                 equipmentDetail.IPAddressTmpFormat = datare.RemoteIPTmp;
                 equipmentDetail.RemotePortTmp = (ushort)datare.RemotePortTmp;
-                log.Info("开始解析数据-" + data.Length);
+             //   log.Info("开始解析数据-" + data.Length);
                 equipmentDetail.SrvTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                 FeaturesCode fc;
                 string outMsg; //返回的错误信息，正确解析则返回空
@@ -557,6 +571,8 @@ namespace GXEBRebackSaveTool.Utils
 
 
                     clientsConn.AddOrUpdate(pp, datare.ConnId, (key, value) => { return value = datare.ConnId; });
+
+                    clientsConnIPEndPoint.AddOrUpdate(pp, new IPEndPoint(IPAddress.Parse(datare.RemoteIPTmp), datare.RemotePortTmp), (key, value) => { return value = new IPEndPoint(IPAddress.Parse(datare.RemoteIPTmp), datare.RemotePortTmp); });//20190402新增
 
                     clientsHeadData.AddOrUpdate(pp, equipmentDetail.HeaderData, (key, value) => { return value = equipmentDetail.HeaderData; });
 

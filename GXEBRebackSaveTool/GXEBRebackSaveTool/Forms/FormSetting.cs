@@ -84,11 +84,11 @@ namespace GXEBRebackSaveTool.Forms
             }
             else
             {
-                if (FormMain.DataBase == null)
-                {
-                    FormMain.DataBase = new DBHelper();
-                }
-                FormMain.DataBase.SetConnectString(this.txtServer.Text.Trim(), this.txtDbuser.Text.Trim(), this.txtDbPass.Text.Trim(), this.txtDb.Text.Trim());
+                //if (FormMain.DataBase == null)
+                //{
+                //    FormMain.DataBase = new DBHelper();
+                //}
+                SingletonInfo.GetInstance().DataBase.SetConnectString(this.txtServer.Text.Trim(), this.txtDbuser.Text.Trim(), this.txtDbPass.Text.Trim(), this.txtDb.Text.Trim());
                 this.ini.WriteValue("LocalHost", "LoaclIP", this.cbBoxIP.Text.Trim());
                 this.ini.WriteValue("LocalHost", "TCPLocalPort", this.textTcpPort.Text.Trim());
                 this.ini.WriteValue("LocalHost", "UDPLocalPort", this.textUdpPort.Text.Trim());
@@ -109,10 +109,10 @@ namespace GXEBRebackSaveTool.Forms
 
         private void btnDBTest_Click(object sender, EventArgs e)
         {
-            if (FormMain.DataBase == null)
-            {
-                FormMain.DataBase = new DBHelper();
-            }
+            //if (FormMain.DataBase == null)
+            //{
+            //    FormMain.DataBase = new DBHelper();
+            //}
             if (!Regex.IsMatch(this.textMQPort.Text.Trim(), "^([0-9]|[1-9]\\d|[1-9]\\d{2}|[1-9]\\d{3}|[1-5]\\d{4}|6[0-4]\\d{3}|65[0-4]\\d{2}|655[0-2]\\d|6553[0-5])$"))
             {
                 MessageBox.Show("端口号应为0到65535的数字，请重新填写", "提示");
@@ -125,11 +125,11 @@ namespace GXEBRebackSaveTool.Forms
             }
             else
             {
-                FormMain.DataBase.SetConnectString(this.txtServer.Text.Trim(), this.txtDbuser.Text.Trim(), this.txtDbPass.Text.Trim(), this.txtDb.Text.Trim());
+                SingletonInfo.GetInstance().DataBase.SetConnectString(this.txtServer.Text.Trim(), this.txtDbuser.Text.Trim(), this.txtDbPass.Text.Trim(), this.txtDb.Text.Trim());
                 this.btnDBTest.Text = "连接中...";
                 Thread thread = new Thread((ThreadStart)delegate
                 {
-                    bool flag = FormMain.DataBase.OpenTest();
+                    bool flag = SingletonInfo.GetInstance().DataBase.OpenTest();
                     bool flag2 = this.PingIp();
                     if (!flag)
                     {

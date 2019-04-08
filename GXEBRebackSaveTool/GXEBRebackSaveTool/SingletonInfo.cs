@@ -38,6 +38,9 @@ namespace GXEBRebackSaveTool
         public bool FTPEnable;//ftp使能 
         public int FTPPathNum;//ftp传输通道数
 
+
+        public DBHelper DataBase;
+
         private SingletonInfo()                                                                 
         {
             factorycode = ""; //
@@ -57,6 +60,7 @@ namespace GXEBRebackSaveTool
             ftpsenderList = new List<FTPSender>();
             FTPEnable = false;
             FTPPathNum = 0;
+            DataBase = new DBHelper();
         }
 
    
