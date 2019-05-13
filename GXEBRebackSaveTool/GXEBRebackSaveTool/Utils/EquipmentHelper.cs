@@ -735,8 +735,9 @@ namespace GXEBRebackSaveTool.Utils
             switch (PackageType)
             {
                 case 0x10:
-                  
-                    data.Add(EquipmentNS.Heartbeat, dataBody.Skip(12 + 2 + 12 * datatagetnum+7).Take(5).ToArray());
+
+                    int physicalcodeLength = dataBody.Skip(12 + 2 + 12 * datatagetnum + 5).Take(1).ToArray()[0];
+                    data.Add(EquipmentNS.Heartbeat, dataBody.Skip(12 + 2 + 12 * datatagetnum+6).Take(physicalcodeLength).ToArray());
                     break;
                 case 0x11:
                     int businessdatanum = ConvertHelper.Byte2int(dataBody.Skip(12 + 2 + 12 * datatagetnum + 1).Take(2).ToArray());
@@ -748,9 +749,18 @@ namespace GXEBRebackSaveTool.Utils
                     {
                         int length = statusdata[index + 1];
                         var eq = (EquipmentNS)statusdata[index];
-                        var dataOrder = statusdata.Skip(index + 2).Take(length).ToArray();
-                        data.Add(eq, dataOrder);
-                        index += length + 2;
+                        if (statusdata[index] == 0x05)
+                        {
+                            var dataOrder = statusdata.Skip(index + 2+1).Take(length-1).ToArray();
+                            data.Add(eq, dataOrder);
+                            index += length + 2;
+                        }
+                        else
+                        {
+                            var dataOrder = statusdata.Skip(index + 2).Take(length).ToArray();
+                            data.Add(eq, dataOrder);
+                            index += length + 2;
+                        }
                     }
                     break;
                 case 0x55:

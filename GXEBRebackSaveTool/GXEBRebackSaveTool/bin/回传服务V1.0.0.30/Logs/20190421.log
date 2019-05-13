@@ -1,0 +1,14 @@
+2019-04-21 15:41:58,148 [1] INFO  GXEBRebackSaveTool.FormMain [(null)] - 回传服务启动：启动时间->2019-04-21 15:41:58
+2019-04-21 15:42:22,438 [11] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 新客户端接入，host：192.168.1.227(57021)
+2019-04-21 15:47:46,347 [1] INFO  GXEBRebackSaveTool.FormMain [(null)] - 回传服务启动：启动时间->2019-04-21 15:47:46
+2019-04-21 15:47:50,470 [14] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 新客户端接入，host：192.168.1.227(57060)
+2019-04-21 15:49:33,207 [1] INFO  GXEBRebackSaveTool.FormMain [(null)] - 回传服务启动：启动时间->2019-04-21 15:49:33
+2019-04-21 15:49:36,933 [14] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 新客户端接入，host：192.168.1.227(57075)
+2019-04-21 15:50:25,510 [1] INFO  GXEBRebackSaveTool.FormMain [(null)] - 回传服务启动：启动时间->2019-04-21 15:50:25
+2019-04-21 15:50:28,799 [14] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 新客户端接入，host：192.168.1.227(57084)
+2019-04-21 15:51:53,314 [1] INFO  GXEBRebackSaveTool.FormMain [(null)] - 回传服务启动：启动时间->2019-04-21 15:51:53
+2019-04-21 15:51:57,061 [14] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 新客户端接入，host：192.168.1.227(57098)
+2019-04-21 15:53:04,995 [1] INFO  GXEBRebackSaveTool.FormMain [(null)] - 回传服务启动：启动时间->2019-04-21 15:53:04
+2019-04-21 15:53:11,471 [14] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 新客户端接入，host：192.168.1.227(57112)
+2019-04-21 16:03:17,102 [1] INFO  GXEBRebackSaveTool.FormMain [(null)] - 回传服务启动：启动时间->2019-04-21 16:03:17
+2019-04-21 16:03:23,228 [14] INFO  GXEBRebackSaveTool.Utils.NetServer [(null)] - 新客户端接入，host：192.168.1.227(57178)
